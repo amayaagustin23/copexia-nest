@@ -1,0 +1,5 @@
+{
+  "welcome": "BIENVENIDO - API",
+  "updated": "{model} actualizada correctamente",
+  "deleted": "{model} eliminada correctamente"
+}

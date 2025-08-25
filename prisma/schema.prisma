@@ -1,4 +1,3 @@
-// schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
@@ -21,4 +20,35 @@ model User {
   role       Role     @default(USER)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+model Category {
+  id         String   @id @default(cuid())
+  name       String
+  slug       String   @unique
+  description String? 
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  posts      Post[]
+}
+
+model Post {
+  id           String   @id @default(cuid())
+  title        String
+  slug         String   @unique
+  excerpt      String?
+  contentHtml  String   // contenido proveniente del editor (HTML)
+  status       PostStatus @default(DRAFT)
+  publishedAt  DateTime?
+  categoryId   String
+  category     Category @relation(fields: [categoryId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([categoryId])
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
 }

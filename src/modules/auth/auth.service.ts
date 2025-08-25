@@ -57,7 +57,6 @@ export class AuthService {
         backoffice: this.configService.get<string>(
           'BACKOFFICE_RESET_PASSWORD_URL',
         ),
-        app: this.configService.get<string>('APP_RESET_PASSWORD_URL'),
       },
     };
   }

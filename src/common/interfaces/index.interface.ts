@@ -64,3 +64,18 @@ export interface ExcelColumn {
   width?: number;
   style?: object;
 }
+
+export interface PostListItem {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  status: 'DRAFT' | 'PUBLISHED';
+  publishedAt: Date | null;
+  updatedAt: Date;
+  category: {
+    id: string;
+    name: string;
+    slug: string;
+  } | null;
+}

@@ -59,9 +59,9 @@ export class RegisterUserDto {
 
   @ApiProperty({
     enum: Role,
-    example: Role.USER,
+    example: Role.ADMIN,
     required: false,
-    default: Role.USER,
+    default: Role.ADMIN,
   })
   @IsOptional()
   @IsEnum(Role, {

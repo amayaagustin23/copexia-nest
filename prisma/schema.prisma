@@ -12,6 +12,20 @@ enum Role {
   ADMIN
 }
 
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+  DELETED
+}
+
+enum CommentStatus {
+  APPROVED
+  PENDING
+  REJECTED
+  DELETED
+}
+
 model User {
   id         String   @id @default(uuid())
   email      String   @unique
@@ -20,4 +34,84 @@ model User {
   role       Role     @default(ADMIN)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  posts      Post[]
+  @@map("users")
 }
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  color       String?  @default("#6366f1")
+  icon        String?
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  posts       PostCategory[]
+  @@map("categories")
+}
+
+model Post {
+  id          String      @id @default(uuid())
+  title       String
+  slug        String      @unique
+  content     String
+  excerpt     String?
+  featuredImage String?
+  status      PostStatus  @default(DRAFT)
+  isPinned    Boolean     @default(false)
+  viewCount   Int         @default(0)
+  likeCount   Int         @default(0)  // Solo contador, sin tracking individual
+  commentCount Int        @default(0)
+  publishedAt DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relaciones
+  authorId    String
+  author      User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  categories  PostCategory[]
+  comments    Comment[]
+
+  @@map("posts")
+}
+
+model PostCategory {
+  id         String   @id @default(uuid())
+  postId     String
+  categoryId String
+  createdAt  DateTime @default(now())
+
+  // Relaciones
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, categoryId])
+  @@map("post_categories")
+}
+
+
+model Comment {
+  id        String        @id @default(uuid())
+  content   String
+  authorName String       // Nombre del comentarista
+  authorEmail String?     // Email del comentarista (opcional)
+  authorWebsite String?   // Website del comentarista (opcional)
+  status    CommentStatus @default(PENDING)
+  parentId  String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  // Relaciones
+  postId    String
+  post      Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parent    Comment?      @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   Comment[]     @relation("CommentReplies")
+
+  @@map("comments")
+}
+
+
+

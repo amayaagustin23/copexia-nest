@@ -13,13 +13,11 @@ import {
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { GetCurrentUser } from 'src/common/decorators/get-current-user.decorator';
-import { HasRoles } from 'src/common/decorators/has-roles.decorator';
-import { Role } from 'src/constants';
+// import { Role } from 'src/constants';
 import { RecoverPasswordDto, ResetPasswordDto } from '../users/dto/user.dto';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { AccessTokenGuard } from './guards/access-token.guard';
-import { RolesGuard } from './guards/roles.guard';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -103,8 +101,7 @@ export class AuthController {
     };
   }
 
-  @UseGuards(AccessTokenGuard, RolesGuard)
-  @HasRoles(Role.USER, Role.ADMIN)
+  @UseGuards(AccessTokenGuard)
   @Get('me')
   @ApiOperation({ summary: 'Info user logged' })
   @ApiResponse({ status: 200, description: 'Password reset successfully' })

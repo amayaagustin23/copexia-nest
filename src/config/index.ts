@@ -30,7 +30,6 @@ export const messagingConfig = {
   },
   resetPasswordUrls: {
     backoffice: env.BACKOFFICE_RESET_PASSWORD_URL,
-    app: env.APP_RESET_PASSWORD_URL,
   },
 } as const;
 

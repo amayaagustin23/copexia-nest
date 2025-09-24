@@ -20,11 +20,11 @@ export const envValidationSchema = Joi.object({
   JWT_RESET_EXPIRES_IN: Joi.string().required(),
   EMAIL_SENDER: Joi.string().required(),
   BACKOFFICE_RESET_PASSWORD_URL: Joi.string().required(),
-  APP_RESET_PASSWORD_URL: Joi.string().required(),
   MAILJET_API_KEY: Joi.string().required(),
   MAILJET_SECRET_KEY: Joi.string().required(),
   AWS_ACCESS_KEY_ID: Joi.string().required(),
   AWS_SECRET_ACCESS_KEY: Joi.string().required(),
   AWS_REGION: Joi.string().required(),
   S3_BUCKET: Joi.string().required(),
+
 });

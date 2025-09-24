@@ -9,18 +9,16 @@ import { JwtService } from '@nestjs/jwt';
 import { I18nService } from 'nestjs-i18n';
 import { JwtPayload } from 'src/config';
 import { MessagingService } from 'src/services/messaging/messaging.service';
+import { PrismaService } from 'src/services/prisma/prisma.service';
 import { comparePassword } from 'src/utils/password';
-import {
-  RecoverPasswordDto,
-  RegisterUserDto,
-  ResetPasswordDto,
-} from '../users/dto/user.dto';
+import { RecoverPasswordDto, ResetPasswordDto } from '../users/dto/user.dto';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
+    private readonly prisma: PrismaService,
     private readonly userService: UsersService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
@@ -62,27 +60,6 @@ export class AuthService {
     };
   }
 
-  async register(userData: RegisterUserDto) {
-    const user = await this.userService.registerUserClient(userData);
-
-    const token = await this.jwtService.signAsync(
-      {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-      },
-      this.jwtConfig.access,
-    );
-
-    await this.messagingService.sendRegisterUserEmail({
-      from: this.messagingConfig.emailSender,
-      to: user.email,
-      redirectUrl: `${this.messagingConfig.registerUserUrls.backoffice}/${token}`,
-    });
-
-    return user;
-  }
-
   async login(credentials: LoginDto) {
     const findUser = await this.userService.get({
       where: { email: credentials.email },
@@ -113,7 +90,8 @@ export class AuthService {
 
     return {
       user: findUser,
-      tokens,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
     };
   }
 
@@ -138,7 +116,7 @@ export class AuthService {
     await this.messagingService.sendRecoverPasswordEmail({
       from: this.messagingConfig.emailSender,
       to: findUser.email,
-      redirectUrl: `${this.messagingConfig.resetPasswordUrls.backoffice}/${token}`,
+      redirectUrl: `${this.messagingConfig.resetPasswordUrls.backoffice}?token=${token}`,
     });
 
     return {
@@ -146,9 +124,20 @@ export class AuthService {
     };
   }
 
-  async resetPassword(id: string, body: ResetPasswordDto) {
+  async resetPassword(
+    token: string,
+    body: ResetPasswordDto,
+  ): Promise<{ message: string }> {
+    const decoded = this.jwtService.decode(token);
+    if (!decoded?.id) {
+      throw new UnauthorizedException(
+        this.i18n.t('errors.validations.invalidToken'),
+      );
+    }
+
+    const userId = decoded.id;
     const findUser = await this.userService.getRaw({
-      where: { id },
+      where: { id: userId },
       select: {
         id: true,
         email: true,
@@ -176,7 +165,7 @@ export class AuthService {
       );
     }
 
-    await this.userService.changePassword(id, body);
+    await this.userService.changePassword(userId, body);
 
     await this.messagingService.sendResetPasswordEmail({
       from: this.messagingConfig.emailSender,
@@ -186,6 +175,12 @@ export class AuthService {
     return {
       message: this.i18n.t('emails.changePassword'),
     };
+  }
+
+  async getMe(id: string) {
+    return await this.prisma.user.findUnique({
+      where: { id },
+    });
   }
 
   private async createTokens(payload: JwtPayload) {

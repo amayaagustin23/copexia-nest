@@ -457,3 +457,218 @@ export class SuccessResponseDto {
   })
   message: string;
 }
+
+export class CategoryWithCountResponseDto {
+  @ApiProperty({
+    description: 'ID único de la categoría',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  id: string;
+
+  @ApiProperty({
+    description: 'Nombre de la categoría',
+    example: 'Consultoría Empresarial',
+  })
+  name: string;
+
+  @ApiProperty({
+    description: 'Slug de la categoría',
+    example: 'consultoria-empresarial',
+  })
+  slug: string;
+
+  @ApiProperty({
+    description: 'Descripción de la categoría',
+    example: 'Estrategias y soluciones para el crecimiento empresarial',
+    nullable: true,
+  })
+  description: string | null;
+
+  @ApiProperty({
+    description: 'Color de la categoría',
+    example: '#3b82f6',
+    nullable: true,
+  })
+  color: string | null;
+
+  @ApiProperty({
+    description: 'Icono de la categoría',
+    example: '🏢',
+    nullable: true,
+  })
+  icon: string | null;
+
+  @ApiProperty({
+    description: 'Estado activo de la categoría',
+    example: true,
+  })
+  isActive: boolean;
+
+  @ApiProperty({
+    description: 'Orden de clasificación',
+    example: 1,
+  })
+  sortOrder: number;
+
+  @ApiProperty({
+    description: 'Fecha de creación',
+    example: '2024-01-15T10:30:00.000Z',
+  })
+  createdAt: Date;
+
+  @ApiProperty({
+    description: 'Fecha de última actualización',
+    example: '2024-01-15T10:30:00.000Z',
+  })
+  updatedAt: Date;
+
+  @ApiProperty({
+    description: 'Conteo de posts en esta categoría',
+    type: 'object',
+    properties: {
+      posts: {
+        type: 'number',
+        example: 5,
+      },
+    },
+  })
+  _count: {
+    posts: number;
+  };
+}
+
+export class CommentWithPostResponseDto {
+  @ApiProperty({
+    description: 'ID único del comentario',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  id: string;
+
+  @ApiProperty({
+    description: 'Contenido del comentario',
+    example: 'Excelente guía sobre crecimiento empresarial!',
+  })
+  content: string;
+
+  @ApiProperty({
+    description: 'Nombre del autor del comentario',
+    example: 'Roberto Martínez',
+  })
+  authorName: string;
+
+  @ApiProperty({
+    description: 'Email del autor del comentario',
+    example: 'roberto.martinez@empresa.com',
+    nullable: true,
+  })
+  authorEmail: string | null;
+
+  @ApiProperty({
+    description: 'Website del autor del comentario',
+    example: 'https://robertomartinez.com',
+    nullable: true,
+  })
+  authorWebsite: string | null;
+
+  @ApiProperty({
+    description: 'Estado del comentario',
+    example: 'APPROVED',
+    enum: ['APPROVED', 'PENDING', 'REJECTED', 'DELETED'],
+  })
+  status: string;
+
+  @ApiProperty({
+    description: 'ID del comentario padre',
+    example: '456e7890-e89b-12d3-a456-426614174001',
+    nullable: true,
+  })
+  parentId: string | null;
+
+  @ApiProperty({
+    description: 'Fecha de creación del comentario',
+    example: '2024-01-15T10:30:00.000Z',
+  })
+  createdAt: Date;
+
+  @ApiProperty({
+    description: 'Fecha de última actualización',
+    example: '2024-01-15T10:30:00.000Z',
+  })
+  updatedAt: Date;
+
+  @ApiProperty({
+    description: 'Información del post relacionado',
+    type: 'object',
+    properties: {
+      id: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+      title: {
+        type: 'string',
+        example: 'Estrategias de Crecimiento Empresarial',
+      },
+      slug: { type: 'string', example: 'estrategia-crecimiento-empresarial' },
+    },
+  })
+  post: {
+    id: string;
+    title: string;
+    slug: string;
+  };
+}
+
+export class MonthlyStatsResponseDto {
+  @ApiProperty({
+    description: 'Mes en formato YYYY-MM',
+    example: '2024-01',
+  })
+  month: string;
+
+  @ApiProperty({
+    description: 'Número de posts creados en ese mes',
+    example: 5,
+  })
+  count: number;
+
+  @ApiProperty({
+    description: 'Etiqueta legible del mes',
+    example: 'enero 2024',
+  })
+  label: string;
+}
+
+export class DashboardResponseDto {
+  @ApiProperty({
+    description: 'Estadísticas generales del dashboard',
+    type: PostStatsResponseDto,
+  })
+  stats: PostStatsResponseDto;
+
+  @ApiProperty({
+    description: 'Posts más recientes (últimos 5)',
+    type: [PostResponseDto],
+  })
+  recentPosts: PostResponseDto[];
+
+  @ApiProperty({
+    description: 'Posts más populares por vistas (top 5)',
+    type: [PostResponseDto],
+  })
+  topPosts: PostResponseDto[];
+
+  @ApiProperty({
+    description: 'Todas las categorías con conteo de posts',
+    type: [CategoryWithCountResponseDto],
+  })
+  categories: CategoryWithCountResponseDto[];
+
+  @ApiProperty({
+    description: 'Comentarios más recientes (últimos 10)',
+    type: [CommentWithPostResponseDto],
+  })
+  recentComments: CommentWithPostResponseDto[];
+
+  @ApiProperty({
+    description: 'Estadísticas mensuales de los últimos 6 meses',
+    type: [MonthlyStatsResponseDto],
+  })
+  monthlyStats: MonthlyStatsResponseDto[];
+}

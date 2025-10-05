@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { PostStatus } from '@prisma/client';
+import { CommentStatus, PostStatus } from '@prisma/client';
 import { paginatePrisma } from '../../common/pagination';
 import { PaginationArgs } from '../../common/pagination/pagination.interface';
 import { PrismaService } from '../../services/prisma/prisma.service';
@@ -28,7 +28,7 @@ export class PostsService {
     const existingSlugs = await this.prisma.post.findMany({
       select: { slug: true },
     });
-    const slugs = existingSlugs.map(post => post.slug);
+    const slugs = existingSlugs.map((post) => post.slug);
 
     // Generar slug único basado en el título
     const slug = generateSlug(postData.title, slugs);
@@ -39,13 +39,14 @@ export class PostsService {
         ...postData,
         slug,
         authorId,
-        publishedAt: postData.status === PostStatus.PUBLISHED ? new Date() : null,
+        publishedAt:
+          postData.status === PostStatus.PUBLISHED ? new Date() : null,
       },
     });
 
     // Asignar categorías
     await this.prisma.postCategory.createMany({
-      data: categoryIds.map(categoryId => ({
+      data: categoryIds.map((categoryId) => ({
         postId: post.id,
         categoryId,
       })),
@@ -64,19 +65,21 @@ export class PostsService {
           { excerpt: { contains: pagination.search, mode: 'insensitive' } },
         ],
       }),
-      ...(pagination.startDate && pagination.endDate && {
-        publishedAt: {
-          gte: pagination.startDate,
-          lte: pagination.endDate,
-        },
-      }),
+      ...(pagination.startDate &&
+        pagination.endDate && {
+          publishedAt: {
+            gte: pagination.startDate,
+            lte: pagination.endDate,
+          },
+        }),
     };
 
-    const orderBy: any = pagination.orderBy === 'updatedAt' 
-      ? [{ isPinned: 'desc' }, { updatedAt: 'desc' }]
-      : [{ isPinned: 'desc' }, { publishedAt: 'desc' }];
+    const orderBy: any =
+      pagination.orderBy === 'updatedAt'
+        ? [{ isPinned: 'desc' }, { updatedAt: 'desc' }]
+        : [{ isPinned: 'desc' }, { publishedAt: 'desc' }];
 
-    return paginatePrisma(
+    const result = await paginatePrisma(
       this.prisma.post,
       {
         where,
@@ -88,10 +91,10 @@ export class PostsService {
             include: { category: true },
           },
           comments: {
-            where: { status: 'APPROVED' },
+            where: { status: CommentStatus.APPROVED },
             include: {
               replies: {
-                where: { status: 'APPROVED' },
+                where: { status: CommentStatus.APPROVED },
               },
             },
           },
@@ -100,6 +103,20 @@ export class PostsService {
       },
       pagination,
     );
+
+    // Calcular commentCount dinámicamente
+    const postsWithCommentCount = result.data.map((post: any) => ({
+      ...post,
+      commentCount: post.comments.reduce(
+        (total: number, comment: any) => total + 1 + comment.replies.length,
+        0,
+      ),
+    }));
+
+    return {
+      ...result,
+      data: postsWithCommentCount,
+    };
   }
 
   async findAllAdmin(pagination: PaginationArgs) {
@@ -111,19 +128,21 @@ export class PostsService {
           { excerpt: { contains: pagination.search, mode: 'insensitive' } },
         ],
       }),
-      ...(pagination.startDate && pagination.endDate && {
-        createdAt: {
-          gte: pagination.startDate,
-          lte: pagination.endDate,
-        },
-      }),
+      ...(pagination.startDate &&
+        pagination.endDate && {
+          createdAt: {
+            gte: pagination.startDate,
+            lte: pagination.endDate,
+          },
+        }),
     };
 
-    const orderBy: any = pagination.orderBy === 'updatedAt' 
-      ? [{ isPinned: 'desc' }, { updatedAt: 'desc' }]
-      : [{ isPinned: 'desc' }, { createdAt: 'desc' }];
+    const orderBy: any =
+      pagination.orderBy === 'updatedAt'
+        ? [{ isPinned: 'desc' }, { updatedAt: 'desc' }]
+        : [{ isPinned: 'desc' }, { createdAt: 'desc' }];
 
-    return paginatePrisma(
+    const result = await paginatePrisma(
       this.prisma.post,
       {
         where,
@@ -136,7 +155,9 @@ export class PostsService {
           },
           comments: {
             include: {
-              replies: true,
+              replies: {
+                where: { status: CommentStatus.APPROVED },
+              },
             },
           },
         },
@@ -144,6 +165,20 @@ export class PostsService {
       },
       pagination,
     );
+
+    // Calcular commentCount dinámicamente (incluye todos los comentarios para admin)
+    const postsWithCommentCount = result.data.map((post: any) => ({
+      ...post,
+      commentCount: post.comments.reduce(
+        (total: number, comment: any) => total + 1 + comment.replies.length,
+        0,
+      ),
+    }));
+
+    return {
+      ...result,
+      data: postsWithCommentCount,
+    };
   }
 
   async findOne(id: string) {
@@ -157,10 +192,10 @@ export class PostsService {
           include: { category: true },
         },
         comments: {
-          where: { status: 'APPROVED' },
+          where: { status: CommentStatus.APPROVED },
           include: {
             replies: {
-              where: { status: 'APPROVED' },
+              where: { status: CommentStatus.APPROVED },
             },
           },
         },
@@ -171,7 +206,16 @@ export class PostsService {
       throw new NotFoundException('Post no encontrado');
     }
 
-    return post;
+    // Calcular commentCount dinámicamente
+    const commentCount = (post as any).comments.reduce(
+      (total: number, comment: any) => total + 1 + comment.replies.length,
+      0,
+    );
+
+    return {
+      ...post,
+      commentCount,
+    };
   }
 
   async findOnePublic(slug: string) {
@@ -185,10 +229,10 @@ export class PostsService {
           include: { category: true },
         },
         comments: {
-          where: { status: 'APPROVED' },
+          where: { status: CommentStatus.APPROVED },
           include: {
             replies: {
-              where: { status: 'APPROVED' },
+              where: { status: CommentStatus.APPROVED },
             },
           },
         },
@@ -205,7 +249,17 @@ export class PostsService {
       data: { viewCount: { increment: 1 } },
     });
 
-    return { ...post, viewCount: post.viewCount + 1 };
+    // Calcular commentCount dinámicamente
+    const commentCount = (post as any).comments.reduce(
+      (total: number, comment: any) => total + 1 + comment.replies.length,
+      0,
+    );
+
+    return {
+      ...post,
+      viewCount: post.viewCount + 1,
+      commentCount,
+    };
   }
 
   async update(id: string, updatePostDto: UpdatePostDto) {
@@ -237,7 +291,7 @@ export class PostsService {
 
       // Agregar nuevas categorías
       await this.prisma.postCategory.createMany({
-        data: categoryIds.map(categoryId => ({
+        data: categoryIds.map((categoryId) => ({
           postId: id,
           categoryId,
         })),
@@ -251,7 +305,7 @@ export class PostsService {
         where: { id: { not: id } },
         select: { slug: true },
       });
-      const slugs = existingSlugs.map(post => post.slug);
+      const slugs = existingSlugs.map((post) => post.slug);
       slug = generateSlug(postData.title, slugs);
     }
 
@@ -261,9 +315,10 @@ export class PostsService {
       data: {
         ...postData,
         slug,
-        publishedAt: postData.status === PostStatus.PUBLISHED && !existingPost.publishedAt 
-          ? new Date() 
-          : existingPost.publishedAt,
+        publishedAt:
+          postData.status === PostStatus.PUBLISHED && !existingPost.publishedAt
+            ? new Date()
+            : existingPost.publishedAt,
       },
     });
 
@@ -316,12 +371,30 @@ export class PostsService {
     // Decrementar el contador de likes (mínimo 0)
     const updatedPost = await this.prisma.post.update({
       where: { id: postId },
-      data: { 
-        likeCount: post.likeCount > 0 ? { decrement: 1 } : 0 
+      data: {
+        likeCount: post.likeCount > 0 ? { decrement: 1 } : 0,
       },
     });
 
     return { likeCount: updatedPost.likeCount };
+  }
+
+  async incrementView(postId: string) {
+    const post = await this.prisma.post.findUnique({
+      where: { id: postId },
+    });
+
+    if (!post || post.status !== PostStatus.PUBLISHED) {
+      throw new NotFoundException('Post no encontrado');
+    }
+
+    // Incrementar el contador de visualizaciones
+    const updatedPost = await this.prisma.post.update({
+      where: { id: postId },
+      data: { viewCount: { increment: 1 } },
+    });
+
+    return { viewCount: updatedPost.viewCount };
   }
 
   async createComment(postId: string, createCommentDto: CreateCommentDto) {
@@ -333,7 +406,6 @@ export class PostsService {
       throw new NotFoundException('Post no encontrado');
     }
 
-    // Si es una respuesta, verificar que el comentario padre existe
     if (createCommentDto.parentId) {
       const parentComment = await this.prisma.comment.findUnique({
         where: { id: createCommentDto.parentId },
@@ -348,23 +420,18 @@ export class PostsService {
       data: {
         content: createCommentDto.content,
         authorName: createCommentDto.authorName,
+        status: CommentStatus.APPROVED,
         authorEmail: createCommentDto.authorEmail,
         authorWebsite: createCommentDto.authorWebsite,
         ...(createCommentDto.parentId && {
           parent: {
-            connect: { id: createCommentDto.parentId }
-          }
+            connect: { id: createCommentDto.parentId },
+          },
         }),
         post: {
-          connect: { id: postId }
-        }
+          connect: { id: postId },
+        },
       },
-    });
-
-    // Incrementar contador de comentarios
-    await this.prisma.post.update({
-      where: { id: postId },
-      data: { commentCount: { increment: 1 } },
     });
 
     return comment;
@@ -372,14 +439,14 @@ export class PostsService {
 
   async getComments(postId: string) {
     return this.prisma.comment.findMany({
-      where: { 
+      where: {
         postId,
-        status: 'APPROVED',
+        status: CommentStatus.APPROVED,
         parentId: null, // Solo comentarios principales
       },
       include: {
         replies: {
-          where: { status: 'APPROVED' },
+          where: { status: CommentStatus.APPROVED },
         },
       },
       orderBy: { createdAt: 'desc' },
@@ -408,9 +475,7 @@ export class PostsService {
       this.prisma.post.aggregate({
         _sum: { likeCount: true },
       }),
-      this.prisma.post.aggregate({
-        _sum: { commentCount: true },
-      }),
+      this.prisma.comment.count(), // Contar comentarios directamente desde la tabla
     ]);
 
     return {
@@ -421,7 +486,142 @@ export class PostsService {
       pinnedPosts,
       totalViews: totalViews._sum.viewCount || 0,
       totalLikes: totalLikes._sum.likeCount || 0,
-      totalComments: totalComments._sum.commentCount || 0,
+      totalComments,
     };
+  }
+
+  async getDashboard() {
+    const [
+      stats,
+      recentPosts,
+      topPosts,
+      categories,
+      recentComments,
+      monthlyStats,
+    ] = await Promise.all([
+      this.getStats(),
+      this.prisma.post.findMany({
+        take: 5,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          author: {
+            select: { id: true, name: true, email: true },
+          },
+          categories: {
+            include: { category: true },
+          },
+          comments: {
+            where: { status: CommentStatus.APPROVED },
+            include: {
+              replies: {
+                where: { status: CommentStatus.APPROVED },
+              },
+            },
+          },
+        },
+      }),
+      this.prisma.post.findMany({
+        take: 5,
+        orderBy: { viewCount: 'desc' },
+        include: {
+          author: {
+            select: { id: true, name: true, email: true },
+          },
+          categories: {
+            include: { category: true },
+          },
+          comments: {
+            where: { status: CommentStatus.APPROVED },
+            include: {
+              replies: {
+                where: { status: CommentStatus.APPROVED },
+              },
+            },
+          },
+        },
+      }),
+      // Todas las categorías con conteo de posts
+      this.prisma.category.findMany({
+        include: {
+          _count: {
+            select: { posts: true },
+          },
+        },
+        orderBy: { sortOrder: 'asc' },
+      }),
+      // Comentarios recientes (últimos 10)
+      this.prisma.comment.findMany({
+        take: 10,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          post: {
+            select: { id: true, title: true, slug: true },
+          },
+        },
+      }),
+      // Estadísticas mensuales (últimos 6 meses)
+      this.getMonthlyStats(),
+    ]);
+
+    // Calcular commentCount dinámicamente para posts recientes
+    const recentPostsWithCount = recentPosts.map((post: any) => ({
+      ...post,
+      commentCount: post.comments.reduce(
+        (total: number, comment: any) => total + 1 + comment.replies.length,
+        0,
+      ),
+    }));
+
+    // Calcular commentCount dinámicamente para posts populares
+    const topPostsWithCount = topPosts.map((post: any) => ({
+      ...post,
+      commentCount: post.comments.reduce(
+        (total: number, comment: any) => total + 1 + comment.replies.length,
+        0,
+      ),
+    }));
+
+    return {
+      stats,
+      recentPosts: recentPostsWithCount,
+      topPosts: topPostsWithCount,
+      categories,
+      recentComments,
+      monthlyStats,
+    };
+  }
+
+  private async getMonthlyStats() {
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    const monthlyData = await this.prisma.post.groupBy({
+      by: ['createdAt'],
+      where: {
+        createdAt: {
+          gte: sixMonthsAgo,
+        },
+      },
+      _count: {
+        id: true,
+      },
+    });
+
+    // Agrupar por mes y año
+    const monthlyStats = monthlyData.reduce((acc: any, item: any) => {
+      const monthYear = item.createdAt.toISOString().substring(0, 7); // YYYY-MM
+      acc[monthYear] = (acc[monthYear] || 0) + item._count.id;
+      return acc;
+    }, {});
+
+    // Convertir a array con formato legible
+    return Object.entries(monthlyStats).map(([month, count]) => ({
+      month,
+      count,
+      label: new Date(month + '-01').toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'long',
+      }),
+    }));
   }
 }

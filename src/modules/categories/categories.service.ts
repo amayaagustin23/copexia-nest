@@ -1,4 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { paginatePrisma } from '../../common/pagination';
+import { PaginationArgs } from '../../common/pagination/pagination.interface';
 import { PrismaService } from '../../services/prisma/prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -22,13 +24,83 @@ export class CategoriesService {
     });
   }
 
-  async findAll() {
-    return this.prisma.category.findMany({
-      orderBy: [
-        { sortOrder: 'asc' },
-        { name: 'asc' },
-      ],
+  async findAllAdmin(pagination: PaginationArgs) {
+    const where: any = {
+      ...(pagination.search && {
+        OR: [
+          { name: { contains: pagination.search, mode: 'insensitive' } },
+          { description: { contains: pagination.search, mode: 'insensitive' } },
+          { slug: { contains: pagination.search, mode: 'insensitive' } },
+        ],
+      }),
+      ...(pagination.startDate &&
+        pagination.endDate && {
+          createdAt: {
+            gte: pagination.startDate,
+            lte: pagination.endDate,
+          },
+        }),
+    };
+
+    const orderBy: any =
+      pagination.orderBy === 'updatedAt'
+        ? [{ sortOrder: 'asc' }, { updatedAt: 'desc' }]
+        : [{ sortOrder: 'asc' }, { name: 'asc' }];
+
+    const result = await paginatePrisma(
+      this.prisma.category,
+      {
+        where,
+        include: {
+          posts: {
+            include: {
+              post: {
+                select: {
+                  id: true,
+                  title: true,
+                  slug: true,
+                  status: true,
+                  publishedAt: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy,
+      },
+      pagination,
+    );
+    const categoriesWithPostCount = result.data.map((category: any) => ({
+      ...category,
+      postCount: category.posts.length,
+    }));
+
+    // Calcular estadísticas
+    const totalCategories = await this.prisma.category.count();
+    const activeCategories = await this.prisma.category.count({
+      where: { isActive: true },
     });
+    const categoriesWithPosts = await this.prisma.category.count({
+      where: {
+        posts: {
+          some: {},
+        },
+      },
+    });
+
+    const stats = {
+      totalCategories,
+      activeCategories,
+      inactiveCategories: totalCategories - activeCategories,
+      categoriesWithPosts,
+      categoriesWithoutPosts: totalCategories - categoriesWithPosts,
+    };
+
+    return {
+      ...result,
+      data: categoriesWithPostCount,
+      stats,
+    };
   }
 
   async findOne(id: string) {
@@ -95,7 +167,10 @@ export class CategoriesService {
     }
 
     // Si se actualiza el slug, verificar que no existe
-    if (updateCategoryDto.slug && updateCategoryDto.slug !== existingCategory.slug) {
+    if (
+      updateCategoryDto.slug &&
+      updateCategoryDto.slug !== existingCategory.slug
+    ) {
       const slugExists = await this.prisma.category.findUnique({
         where: { slug: updateCategoryDto.slug },
       });
@@ -125,7 +200,9 @@ export class CategoriesService {
 
     // Verificar si tiene posts asociados
     if (category.posts.length > 0) {
-      throw new BadRequestException('No se puede eliminar una categoría que tiene posts asociados');
+      throw new BadRequestException(
+        'No se puede eliminar una categoría que tiene posts asociados',
+      );
     }
 
     await this.prisma.category.delete({
@@ -133,27 +210,5 @@ export class CategoriesService {
     });
 
     return { message: 'Categoría eliminada correctamente' };
-  }
-
-  async getStats() {
-    const totalCategories = await this.prisma.category.count();
-    const activeCategories = await this.prisma.category.count({
-      where: { isActive: true },
-    });
-    const categoriesWithPosts = await this.prisma.category.count({
-      where: {
-        posts: {
-          some: {},
-        },
-      },
-    });
-
-    return {
-      totalCategories,
-      activeCategories,
-      inactiveCategories: totalCategories - activeCategories,
-      categoriesWithPosts,
-      categoriesWithoutPosts: totalCategories - categoriesWithPosts,
-    };
   }
 }

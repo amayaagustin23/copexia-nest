@@ -1,6 +1,6 @@
 export interface PaginationArgs {
   page?: number;
-  perPage?: number;
+  size?: number;
   orderBy?: 'createdAt' | 'updatedAt';
   search?: string;
   date?: Date;

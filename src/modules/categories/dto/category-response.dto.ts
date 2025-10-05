@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { PaginationResult } from 'src/common/pagination';
 
 export class CategoryResponseDto {
   @ApiProperty({
@@ -63,30 +64,50 @@ export class CategoryResponseDto {
     example: '2024-01-15T10:30:00.000Z',
   })
   updatedAt: Date;
-}
 
-export class CategoryWithPostsResponseDto extends CategoryResponseDto {
+  @ApiProperty({
+    description: 'Número de posts en esta categoría',
+    example: 5,
+  })
+  postCount: number;
+
   @ApiProperty({
     description: 'Posts asociados a la categoría',
     type: 'array',
     items: {
       type: 'object',
       properties: {
-        id: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
-        title: { type: 'string', example: 'Introducción a NestJS' },
-        slug: { type: 'string', example: 'introduccion-a-nestjs' },
-        status: { type: 'string', example: 'PUBLISHED' },
-        publishedAt: { type: 'string', example: '2024-01-15T10:30:00.000Z' },
+        post: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              example: '123e4567-e89b-12d3-a456-426614174000',
+            },
+            title: { type: 'string', example: 'Introducción a NestJS' },
+            slug: { type: 'string', example: 'introduccion-a-nestjs' },
+            status: { type: 'string', example: 'PUBLISHED' },
+            publishedAt: {
+              type: 'string',
+              example: '2024-01-15T10:30:00.000Z',
+            },
+          },
+        },
       },
     },
   })
   posts: Array<{
-    id: string;
-    title: string;
-    slug: string;
-    status: string;
-    publishedAt: Date | null;
+    post: {
+      id: string;
+      title: string;
+      slug: string;
+      status: string;
+      publishedAt: Date | null;
+    };
   }>;
+}
+
+export class CategoryWithPostsResponseDto extends CategoryResponseDto {
 }
 
 export class CategoryStatsResponseDto {
@@ -147,4 +168,70 @@ export class SuccessResponseDto {
     example: 'Categoría eliminada correctamente',
   })
   message: string;
+}
+
+export class CategoryStatsDto {
+  @ApiProperty({
+    description: 'Total de categorías',
+    example: 10,
+  })
+  totalCategories: number;
+
+  @ApiProperty({
+    description: 'Categorías activas',
+    example: 8,
+  })
+  activeCategories: number;
+
+  @ApiProperty({
+    description: 'Categorías inactivas',
+    example: 2,
+  })
+  inactiveCategories: number;
+
+  @ApiProperty({
+    description: 'Categorías que tienen posts asociados',
+    example: 6,
+  })
+  categoriesWithPosts: number;
+
+  @ApiProperty({
+    description: 'Categorías sin posts asociados',
+    example: 4,
+  })
+  categoriesWithoutPosts: number;
+}
+
+export class PaginatedCategoriesResponseDto
+  implements PaginationResult<CategoryResponseDto>
+{
+  @ApiProperty({
+    description: 'Lista de categorías paginada',
+    type: [CategoryResponseDto],
+  })
+  data: CategoryResponseDto[];
+
+  @ApiProperty({
+    description: 'Total de categorías',
+    example: 25,
+  })
+  total: number;
+
+  @ApiProperty({
+    description: 'Página actual',
+    example: 1,
+  })
+  page: number;
+
+  @ApiProperty({
+    description: 'Tamaño de página',
+    example: 10,
+  })
+  size: number;
+
+  @ApiProperty({
+    description: 'Estadísticas de categorías',
+    type: CategoryStatsDto,
+  })
+  stats: CategoryStatsDto;
 }

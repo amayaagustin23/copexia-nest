@@ -5,11 +5,11 @@ import I18nModuleConfig from 'src/config/i18n/i18n.config';
 import { UploadModule } from 'src/services/aws/aws.module';
 import { PrismaModule } from '../../services/prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
+import { CategoriesModule } from '../categories/categories.module';
+import { PostsModule } from '../posts/posts.module';
 import { UsersModule } from '../users/users.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { PostsModule } from '../posts/posts.module';
-import { CategoriesModule } from '../categories/categories.module';
 
 @Module({
   imports: [

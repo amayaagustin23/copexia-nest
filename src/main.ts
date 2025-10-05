@@ -6,6 +6,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { NestApplication, NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as cookieParser from 'cookie-parser';
 import { json, urlencoded } from 'express';
 import { I18nValidationPipe } from 'nestjs-i18n';
 import { LoggerInterceptor } from './common/interceptors/logger.interceptor';
@@ -40,6 +41,7 @@ async function bootstrap() {
       ignoreDecorators: true,
     }),
   );
+  app.use(cookieParser());
   app.use(json({ limit: '50mb' }));
   app.use(urlencoded({ extended: true, limit: '50mb' }));
 

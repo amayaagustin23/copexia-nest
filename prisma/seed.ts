@@ -19,7 +19,7 @@ async function main() {
 
   console.log('✅ Usuario admin creado');
 
-  // Crear categorías
+  // Crear 12 categorías
   const categories = await Promise.all([
     prisma.category.upsert({
       where: { slug: 'consultoria-empresarial' },
@@ -51,299 +51,315 @@ async function main() {
       create: {
         name: 'Recursos Humanos',
         slug: 'recursos-humanos',
-        description: 'Gestión del talento y desarrollo organizacional',
+        description: 'Gestión de talento y desarrollo organizacional',
         color: '#f59e0b',
         icon: '👥',
         sortOrder: 3,
       },
     }),
     prisma.category.upsert({
-      where: { slug: 'marketing-estrategico' },
+      where: { slug: 'marketing-digital' },
       update: {},
       create: {
-        name: 'Marketing Estratégico',
-        slug: 'marketing-estrategico',
-        description: 'Estrategias de marketing y posicionamiento de marca',
-        color: '#8b5cf6',
-        icon: '📈',
+        name: 'Marketing Digital',
+        slug: 'marketing-digital',
+        description: 'Estrategias de marketing y presencia digital',
+        color: '#ef4444',
+        icon: '📱',
         sortOrder: 4,
       },
     }),
     prisma.category.upsert({
-      where: { slug: 'operaciones' },
+      where: { slug: 'tecnologia-innovacion' },
       update: {},
       create: {
-        name: 'Operaciones',
-        slug: 'operaciones',
-        description: 'Optimización de procesos y eficiencia operativa',
-        color: '#ef4444',
-        icon: '⚙️',
+        name: 'Tecnología e Innovación',
+        slug: 'tecnologia-innovacion',
+        description: 'Transformación digital y nuevas tecnologías',
+        color: '#8b5cf6',
+        icon: '🚀',
         sortOrder: 5,
       },
     }),
     prisma.category.upsert({
-      where: { slug: 'liderazgo' },
+      where: { slug: 'operaciones-logistica' },
       update: {},
       create: {
-        name: 'Liderazgo',
-        slug: 'liderazgo',
-        description: 'Desarrollo de liderazgo y gestión de equipos',
+        name: 'Operaciones y Logística',
+        slug: 'operaciones-logistica',
+        description: 'Optimización de procesos y cadena de suministro',
         color: '#06b6d4',
-        icon: '🎯',
+        icon: '📦',
         sortOrder: 6,
+      },
+    }),
+    prisma.category.upsert({
+      where: { slug: 'ventas-comercial' },
+      update: {},
+      create: {
+        name: 'Ventas y Comercial',
+        slug: 'ventas-comercial',
+        description: 'Estrategias de ventas y desarrollo comercial',
+        color: '#84cc16',
+        icon: '💼',
+        sortOrder: 7,
+      },
+    }),
+    prisma.category.upsert({
+      where: { slug: 'calidad-procesos' },
+      update: {},
+      create: {
+        name: 'Calidad y Procesos',
+        slug: 'calidad-procesos',
+        description: 'Mejora continua y gestión de calidad',
+        color: '#f97316',
+        icon: '⭐',
+        sortOrder: 8,
+      },
+    }),
+    prisma.category.upsert({
+      where: { slug: 'liderazgo-gestion' },
+      update: {},
+      create: {
+        name: 'Liderazgo y Gestión',
+        slug: 'liderazgo-gestion',
+        description: 'Desarrollo de liderazgo y habilidades directivas',
+        color: '#ec4899',
+        icon: '👑',
+        sortOrder: 9,
+      },
+    }),
+    prisma.category.upsert({
+      where: { slug: 'sostenibilidad-rse' },
+      update: {},
+      create: {
+        name: 'Sostenibilidad y RSE',
+        slug: 'sostenibilidad-rse',
+        description: 'Responsabilidad social y sostenibilidad empresarial',
+        color: '#22c55e',
+        icon: '🌱',
+        sortOrder: 10,
+      },
+    }),
+    prisma.category.upsert({
+      where: { slug: 'analisis-datos' },
+      update: {},
+      create: {
+        name: 'Análisis de Datos',
+        slug: 'analisis-datos',
+        description: 'Business Intelligence y análisis de datos',
+        color: '#6366f1',
+        icon: '📊',
+        sortOrder: 11,
+      },
+    }),
+    prisma.category.upsert({
+      where: { slug: 'compliance-legal' },
+      update: {},
+      create: {
+        name: 'Compliance y Legal',
+        slug: 'compliance-legal',
+        description: 'Cumplimiento normativo y asuntos legales',
+        color: '#64748b',
+        icon: '⚖️',
+        sortOrder: 12,
       },
     }),
   ]);
 
-  console.log('✅ Categorías creadas');
+  console.log('✅ 12 categorías creadas');
 
-  // Crear posts
+  // Crear 15 posts
   const posts = await Promise.all([
     prisma.post.upsert({
-      where: { slug: 'estrategia-crecimiento-empresarial' },
+      where: { slug: 'estrategias-crecimiento-empresarial' },
       update: {},
       create: {
-        title: 'Estrategias de Crecimiento Empresarial: Guía Completa',
-        slug: 'estrategia-crecimiento-empresarial',
+        title: 'Estrategias de Crecimiento Empresarial Sostenible',
+        slug: 'estrategias-crecimiento-empresarial',
         content: `
-<h1>Estrategias de Crecimiento Empresarial: Guía Completa</h1>
+<h1>Estrategias de Crecimiento Empresarial Sostenible</h1>
 
-<p>El crecimiento empresarial sostenible es el objetivo de toda organización. Te presentamos las estrategias más efectivas para escalar tu empresa de manera inteligente y rentable.</p>
+<p>El crecimiento empresarial sostenible requiere una combinación de estrategias financieras, operativas y de mercado. Te presentamos las mejores prácticas para expandir tu negocio de manera responsable.</p>
 
-<h2>Tipos de Crecimiento Empresarial</h2>
+<h2>Análisis del Mercado</h2>
+<p>Antes de expandir, es crucial entender el mercado objetivo y las oportunidades disponibles.</p>
 
-<ul>
-  <li><strong>Crecimiento Orgánico</strong>: Expansión basada en recursos internos</li>
-  <li><strong>Crecimiento por Adquisiciones</strong>: Compra de empresas competidoras o complementarias</li>
-  <li><strong>Crecimiento por Alianzas</strong>: Partnerships estratégicos</li>
-  <li><strong>Crecimiento Geográfico</strong>: Expansión a nuevos mercados</li>
-</ul>
+<h2>Financiamiento del Crecimiento</h2>
+<p>Exploramos las diferentes opciones de financiamiento para sustentar el crecimiento empresarial.</p>
 
-<h2>Factores Clave para el Crecimiento</h2>
-
-<ol>
-  <li><strong>Análisis de Mercado</strong>: Comprender las necesidades del cliente</li>
-  <li><strong>Innovación Continua</strong>: Mantenerse a la vanguardia</li>
-  <li><strong>Gestión del Talento</strong>: Contratar y retener a los mejores</li>
-  <li><strong>Optimización de Procesos</strong>: Eficiencia operativa</li>
-  <li><strong>Finanzas Sólidas</strong>: Gestión de capital y flujo de caja</li>
-</ol>
-
-<h2>Métricas de Crecimiento</h2>
-
-<p>Para medir el éxito del crecimiento, es fundamental monitorear:</p>
-
-<ul>
-  <li>Ingresos recurrentes (ARR/MRR)</li>
-  <li>Tasa de retención de clientes</li>
-  <li>Crecimiento de empleados</li>
-  <li>Participación de mercado</li>
-  <li>ROI de inversiones</li>
-</ul>
-
-<p>Recuerda que el crecimiento sostenible requiere paciencia, planificación estratégica y ejecución disciplinada.</p>
+<h2>Optimización de Procesos</h2>
+<p>La eficiencia operativa es fundamental para sostener el crecimiento a largo plazo.</p>
         `,
         excerpt:
-          'Descubre las estrategias más efectivas para hacer crecer tu empresa de manera sostenible y rentable.',
+          'Descubre las mejores estrategias para hacer crecer tu empresa de manera sostenible y responsable.',
         featuredImage:
-          'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800',
+          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800',
         status: 'PUBLISHED',
         isPinned: true,
-        viewCount: 1850,
-        likeCount: 124,
+        viewCount: 0,
+        likeCount: 0,
         publishedAt: new Date('2024-01-15'),
         authorId: admin.id,
       },
     }),
     prisma.post.upsert({
-      where: { slug: 'gestion-financiera-corporativa' },
+      where: { slug: 'transformacion-digital-empresas' },
       update: {},
       create: {
-        title:
-          'Gestión Financiera Corporativa: Fundamentos y Mejores Prácticas',
-        slug: 'gestion-financiera-corporativa',
+        title: 'Transformación Digital: Guía Completa para Empresas',
+        slug: 'transformacion-digital-empresas',
         content: `
-<h1>Gestión Financiera Corporativa: Fundamentos y Mejores Prácticas</h1>
+<h1>Transformación Digital: Guía Completa para Empresas</h1>
 
-<p>La gestión financiera eficiente es el pilar fundamental de cualquier empresa exitosa. Te guiamos a través de los conceptos esenciales y estrategias probadas.</p>
+<p>La transformación digital ya no es opcional, es una necesidad para mantenerse competitivo en el mercado actual.</p>
 
-<h2>Componentes Clave de la Gestión Financiera</h2>
+<h2>Evaluación del Estado Actual</h2>
+<p>Primer paso: evaluar la madurez digital de tu organización.</p>
 
-<ul>
-  <li><strong>Planificación Financiera</strong>: Presupuestos y proyecciones</li>
-  <li><strong>Control de Costos</strong>: Optimización de gastos operativos</li>
-  <li><strong>Gestión de Liquidez</strong>: Flujo de caja y capital de trabajo</li>
-  <li><strong>Análisis de Rentabilidad</strong>: Métricas financieras clave</li>
-</ul>
+<h2>Roadmap de Transformación</h2>
+<p>Cómo crear un plan estratégico para la transformación digital.</p>
 
-<h2>Herramientas de Análisis Financiero</h2>
-
-<ol>
-  <li><strong>Estado de Resultados</strong>: P&L para análisis de rentabilidad</li>
-  <li><strong>Balance General</strong>: Posición financiera de la empresa</li>
-  <li><strong>Flujo de Efectivo</strong>: Movimientos de dinero</li>
-  <li><strong>Ratios Financieros</strong>: Indicadores de performance</li>
-</ol>
-
-<h2>Métricas Financieras Esenciales</h2>
-
-<p>Para una gestión efectiva, monitorea constantemente:</p>
-
-<ul>
-  <li><strong>ROI (Retorno sobre Inversión)</strong>: Rentabilidad de inversiones</li>
-  <li><strong>ROE (Retorno sobre Patrimonio)</strong>: Eficiencia del capital propio</li>
-  <li><strong>Margen Bruto</strong>: Rentabilidad de productos/servicios</li>
-  <li><strong>Razón Corriente</strong>: Capacidad de pago a corto plazo</li>
-</ul>
-
-<h2>Mejores Prácticas</h2>
-
-<ul>
-  <li>Mantén registros financieros actualizados</li>
-  <li>Implementa controles internos robustos</li>
-  <li>Diversifica fuentes de financiamiento</li>
-  <li>Invierte en tecnología financiera</li>
-  <li>Asesórate con expertos cuando sea necesario</li>
-</ul>
-
-<p>Una gestión financiera sólida no solo protege tu empresa, sino que la posiciona para el crecimiento sostenible.</p>
+<h2>Tecnologías Clave</h2>
+<p>Las tecnologías que están marcando la diferencia en la industria.</p>
         `,
         excerpt:
-          'Aprende los fundamentos de la gestión financiera corporativa y las mejores prácticas para optimizar tu empresa.',
+          'Una guía completa para liderar la transformación digital en tu empresa.',
         featuredImage:
-          'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800',
+          'https://images.unsplash.com/photo-1551434678-e076c223a692?w=800',
         status: 'PUBLISHED',
         isPinned: false,
-        viewCount: 1420,
-        likeCount: 98,
+        viewCount: 0,
+        likeCount: 0,
         publishedAt: new Date('2024-01-20'),
         authorId: admin.id,
       },
     }),
     prisma.post.upsert({
-      where: { slug: 'gestion-talento-recursos-humanos' },
+      where: { slug: 'gestion-talento-humano' },
       update: {},
       create: {
-        title: 'Gestión del Talento: Estrategias Modernas de RRHH',
-        slug: 'gestion-talento-recursos-humanos',
+        title: 'Gestión de Talento Humano en la Era Digital',
+        slug: 'gestion-talento-humano',
         content: `
-<h1>Gestión del Talento: Estrategias Modernas de RRHH</h1>
+<h1>Gestión de Talento Humano en la Era Digital</h1>
 
-<p>En el mundo empresarial actual, el talento humano es el activo más valioso. Te presentamos las estrategias más efectivas para atraer, desarrollar y retener a los mejores profesionales.</p>
+<p>La gestión del talento humano evoluciona constantemente. Descubre las nuevas tendencias y mejores prácticas.</p>
 
-<h2>Estrategias de Atracción de Talento</h2>
+<h2>Atracción de Talento</h2>
+<p>Estrategias modernas para atraer los mejores profesionales.</p>
 
-<ul>
-  <li><strong>Employer Branding</strong>: Construye una marca empleadora sólida</li>
-  <li><strong>Recruitment Marketing</strong>: Promociona oportunidades de manera atractiva</li>
-  <li><strong>Redes Profesionales</strong>: LinkedIn, eventos y networking</li>
-  <li><strong>Programas de Referidos</strong>: Incentiva a empleados actuales</li>
-</ul>
+<h2>Retención y Desarrollo</h2>
+<p>Cómo mantener y desarrollar el talento dentro de la organización.</p>
 
-<h2>Desarrollo y Retención</h2>
-
-<ol>
-  <li><strong>Planes de Carrera</strong>: Rutas claras de crecimiento profesional</li>
-  <li><strong>Capacitación Continua</strong>: Inversión en desarrollo de habilidades</li>
-  <li><strong>Mentoría</strong>: Programas de acompañamiento</li>
-  <li><strong>Reconocimiento</strong>: Sistemas de incentivos y valoración</li>
-</ol>
-
-<h2>Herramientas Tecnológicas para RRHH</h2>
-
-<p>Las siguientes herramientas pueden transformar tu gestión de talento:</p>
-
-<ul>
-  <li><strong>ATS (Applicant Tracking Systems)</strong>: Gestión de candidatos</li>
-  <li><strong>LMS (Learning Management Systems)</strong>: Plataformas de capacitación</li>
-  <li><strong>Performance Management</strong>: Evaluación de desempeño</li>
-  <li><strong>Employee Engagement</strong>: Medición de satisfacción laboral</li>
-</ul>
-
-<h2>Métricas Clave en RRHH</h2>
-
-<ul>
-  <li><strong>Time to Hire</strong>: Tiempo promedio de contratación</li>
-  <li><strong>Turnover Rate</strong>: Tasa de rotación de personal</li>
-  <li><strong>Employee Satisfaction</strong>: Nivel de satisfacción laboral</li>
-  <li><strong>Training ROI</strong>: Retorno de inversión en capacitación</li>
-</ul>
-
-<p>Recuerda que una gestión efectiva del talento no solo mejora la productividad, sino que crea una cultura organizacional fuerte y sostenible.</p>
+<h2>Tecnología en RRHH</h2>
+<p>Herramientas digitales que están revolucionando la gestión de personas.</p>
         `,
         excerpt:
-          'Descubre las estrategias modernas de gestión del talento para atraer, desarrollar y retener a los mejores profesionales.',
+          'Las mejores prácticas para gestionar el talento humano en la era digital.',
         featuredImage:
           'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=800',
         status: 'PUBLISHED',
         isPinned: false,
-        viewCount: 1680,
-        likeCount: 112,
+        viewCount: 0,
+        likeCount: 0,
         publishedAt: new Date('2024-01-25'),
         authorId: admin.id,
       },
     }),
     prisma.post.upsert({
-      where: { slug: 'marketing-estrategico-digital' },
+      where: { slug: 'marketing-digital-estrategias' },
       update: {},
       create: {
-        title: 'Marketing Estratégico Digital: Guía para Empresas',
-        slug: 'marketing-estrategico-digital',
+        title: 'Marketing Digital: Estrategias que Funcionan',
+        slug: 'marketing-digital-estrategias',
         content: `
-<h1>Marketing Estratégico Digital: Guía para Empresas</h1>
+<h1>Marketing Digital: Estrategias que Funcionan</h1>
 
-<p>En la era digital, el marketing estratégico es fundamental para el éxito empresarial. Te guiamos a través de las mejores prácticas y herramientas para maximizar tu presencia digital.</p>
+<p>El marketing digital ofrece infinitas posibilidades. Te mostramos las estrategias más efectivas.</p>
 
-<h2>Pilares del Marketing Digital Estratégico</h2>
+<h2>Content Marketing</h2>
+<p>Cómo crear contenido que genere engagement y conversiones.</p>
 
-<ul>
-  <li><strong>Análisis de Audiencia</strong>: Conoce a tu cliente ideal</li>
-  <li><strong>Posicionamiento de Marca</strong>: Diferenciación en el mercado</li>
-  <li><strong>Estrategia de Contenido</strong>: Valor para tu audiencia</li>
-  <li><strong>Canales de Distribución</strong>: Dónde y cómo comunicar</li>
-</ul>
+<h2>SEO y SEM</h2>
+<p>Optimización para motores de búsqueda y publicidad online.</p>
 
-<h2>Herramientas Esenciales</h2>
-
-<ol>
-  <li><strong>Google Analytics</strong>: Análisis de tráfico web</li>
-  <li><strong>SEMrush/Ahrefs</strong>: Investigación de keywords y competencia</li>
-  <li><strong>HubSpot/Salesforce</strong>: CRM y automatización</li>
-  <li><strong>Hootsuite/Buffer</strong>: Gestión de redes sociales</li>
-</ol>
-
-<h2>Métricas Clave a Monitorear</h2>
-
-<p>Para medir el éxito de tu estrategia digital:</p>
-
-<ul>
-  <li><strong>ROI de Marketing</strong>: Retorno de inversión</li>
-  <li><strong>CAC (Customer Acquisition Cost)</strong>: Costo de adquisición</li>
-  <li><strong>LTV (Lifetime Value)</strong>: Valor de vida del cliente</li>
-  <li><strong>Engagement Rate</strong>: Interacción con tu contenido</li>
-</ul>
-
-<h2>Tendencias 2024</h2>
-
-<ul>
-  <li>Marketing de influencia auténtico</li>
-  <li>Personalización con IA</li>
-  <li>Contenido en video corto</li>
-  <li>Marketing de comunidad</li>
-  <li>Sostenibilidad como diferenciador</li>
-</ul>
-
-<p>El marketing digital exitoso requiere consistencia, creatividad y análisis constante de resultados.</p>
+<h2>Redes Sociales</h2>
+<p>Estrategias para maximizar el impacto en redes sociales.</p>
         `,
         excerpt:
-          'Descubre las estrategias de marketing digital más efectivas para hacer crecer tu empresa en el mundo digital.',
+          'Descubre las estrategias de marketing digital más efectivas para tu empresa.',
         featuredImage:
           'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800',
         status: 'PUBLISHED',
         isPinned: false,
-        viewCount: 1950,
-        likeCount: 145,
-        publishedAt: new Date('2024-01-30'),
+        viewCount: 0,
+        likeCount: 0,
+        publishedAt: new Date('2024-02-01'),
+        authorId: admin.id,
+      },
+    }),
+    prisma.post.upsert({
+      where: { slug: 'finanzas-corporativas-modernas' },
+      update: {},
+      create: {
+        title: 'Finanzas Corporativas Modernas',
+        slug: 'finanzas-corporativas-modernas',
+        content: `
+<h1>Finanzas Corporativas Modernas</h1>
+
+<p>Las finanzas corporativas han evolucionado significativamente. Conoce las nuevas tendencias y herramientas.</p>
+
+<h2>Análisis Financiero</h2>
+<p>Métricas clave para evaluar la salud financiera de la empresa.</p>
+
+<h2>Gestión de Riesgos</h2>
+<p>Cómo identificar y mitigar riesgos financieros.</p>
+
+<h2>Fintech y Innovación</h2>
+<p>El impacto de la tecnología en las finanzas corporativas.</p>
+        `,
+        excerpt:
+          'Las tendencias más importantes en finanzas corporativas modernas.',
+        featuredImage:
+          'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800',
+        status: 'PUBLISHED',
+        isPinned: false,
+        viewCount: 0,
+        likeCount: 0,
+        publishedAt: new Date('2024-02-05'),
+        authorId: admin.id,
+      },
+    }),
+    prisma.post.upsert({
+      where: { slug: 'liderazgo-transformacional' },
+      update: {},
+      create: {
+        title: 'Liderazgo Transformacional en las Organizaciones',
+        slug: 'liderazgo-transformacional',
+        content: `
+<h1>Liderazgo Transformacional en las Organizaciones</h1>
+
+<p>El liderazgo transformacional es clave para el éxito organizacional. Descubre sus características y beneficios.</p>
+
+<h2>Características del Líder Transformacional</h2>
+<p>Los rasgos que definen a un líder transformacional efectivo.</p>
+
+<h2>Impacto en la Organización</h2>
+<p>Cómo el liderazgo transformacional impacta positivamente en los resultados.</p>
+
+<h2>Desarrollo de Liderazgo</h2>
+<p>Estrategias para desarrollar habilidades de liderazgo transformacional.</p>
+        `,
+        excerpt:
+          'Todo sobre el liderazgo transformacional y su impacto en las organizaciones.',
+        featuredImage:
+          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800',
+        status: 'PUBLISHED',
+        isPinned: false,
+        viewCount: 0,
+        likeCount: 0,
+        publishedAt: new Date('2024-02-10'),
         authorId: admin.id,
       },
     }),
@@ -351,316 +367,526 @@ async function main() {
       where: { slug: 'optimizacion-procesos-operativos' },
       update: {},
       create: {
-        title: 'Optimización de Procesos Operativos: Eficiencia Empresarial',
+        title: 'Optimización de Procesos Operativos',
         slug: 'optimizacion-procesos-operativos',
         content: `
-<h1>Optimización de Procesos Operativos: Eficiencia Empresarial</h1>
+<h1>Optimización de Procesos Operativos</h1>
 
-<p>La optimización de procesos es clave para mejorar la eficiencia operativa y reducir costos. Te presentamos metodologías probadas para transformar tu operación.</p>
+<p>La optimización de procesos es fundamental para mejorar la eficiencia y reducir costos operativos.</p>
 
 <h2>Metodologías de Optimización</h2>
+<p>Lean, Six Sigma y otras metodologías probadas para optimizar procesos.</p>
 
-<ul>
-  <li><strong>Lean Six Sigma</strong>: Eliminación de desperdicios y variabilidad</li>
-  <li><strong>Kaizen</strong>: Mejora continua incremental</li>
-  <li><strong>Business Process Reengineering</strong>: Rediseño radical de procesos</li>
-  <li><strong>Value Stream Mapping</strong>: Mapeo de flujo de valor</li>
-</ul>
+<h2>Herramientas de Análisis</h2>
+<p>Las mejores herramientas para analizar y mejorar procesos operativos.</p>
 
-<h2>Pasos para Optimizar Procesos</h2>
-
-<ol>
-  <li><strong>Mapeo de Procesos Actuales</strong>: Documenta el estado actual</li>
-  <li><strong>Identificación de Cuellos de Botella</strong>: Encuentra puntos de fricción</li>
-  <li><strong>Análisis de Causa Raíz</strong>: Entiende los problemas fundamentales</li>
-  <li><strong>Diseño de Procesos Mejorados</strong>: Crea soluciones eficientes</li>
-  <li><strong>Implementación y Monitoreo</strong>: Ejecuta y mide resultados</li>
-</ol>
-
-<h2>Herramientas de Automatización</h2>
-
-<p>La tecnología puede acelerar significativamente la optimización:</p>
-
-<ul>
-  <li><strong>RPA (Robotic Process Automation)</strong>: Automatización de tareas repetitivas</li>
-  <li><strong>Workflow Management</strong>: Gestión de flujos de trabajo</li>
-  <li><strong>ERP Systems</strong>: Integración de procesos empresariales</li>
-  <li><strong>Business Intelligence</strong>: Análisis de datos operativos</li>
-</ul>
-
-<h2>Métricas de Eficiencia Operativa</h2>
-
-<ul>
-  <li><strong>Throughput</strong>: Volumen de producción por tiempo</li>
-  <li><strong>Cycle Time</strong>: Tiempo total del proceso</li>
-  <li><strong>First Pass Yield</strong>: Calidad en primera ejecución</li>
-  <li><strong>Cost per Unit</strong>: Costo por unidad producida</li>
-</ul>
-
-<p>La optimización continua de procesos no solo mejora la eficiencia, sino que también aumenta la satisfacción del cliente y la competitividad empresarial.</p>
+<h2>Casos de Éxito</h2>
+<p>Ejemplos reales de optimización de procesos en diferentes industrias.</p>
         `,
-        excerpt:
-          'Aprende las mejores metodologías y herramientas para optimizar los procesos operativos de tu empresa.',
+        excerpt: 'Aprende a optimizar los procesos operativos de tu empresa.',
         featuredImage:
           'https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=800',
         status: 'PUBLISHED',
         isPinned: false,
-        viewCount: 1380,
-        likeCount: 87,
-        publishedAt: new Date('2024-02-05'),
+        viewCount: 0,
+        likeCount: 0,
+        publishedAt: new Date('2024-02-15'),
         authorId: admin.id,
       },
     }),
     prisma.post.upsert({
-      where: { slug: 'liderazgo-transformacional-empresas' },
+      where: { slug: 'ventas-digitales-estrategias' },
       update: {},
       create: {
-        title: 'Liderazgo Transformacional: Guiando Empresas hacia el Éxito',
-        slug: 'liderazgo-transformacional-empresas',
+        title: 'Estrategias de Ventas Digitales',
+        slug: 'ventas-digitales-estrategias',
         content: `
-<h1>Liderazgo Transformacional: Guiando Empresas hacia el Éxito</h1>
+<h1>Estrategias de Ventas Digitales</h1>
 
-<p>El liderazgo transformacional es fundamental para el crecimiento empresarial sostenible. Te mostramos cómo desarrollar las habilidades necesarias para liderar equipos de alto rendimiento.</p>
+<p>El mundo de las ventas ha cambiado radicalmente. Descubre las nuevas estrategias digitales.</p>
 
-<h2>Características del Liderazgo Transformacional</h2>
+<h2>Prospección Digital</h2>
+<p>Cómo encontrar y contactar prospectos de manera efectiva.</p>
 
-<ul>
-  <li><strong>Inspiración</strong>: Motiva hacia una visión compartida</li>
-  <li><strong>Estimulación Intelectual</strong>: Fomenta la creatividad e innovación</li>
-  <li><strong>Consideración Individual</strong>: Apoya el desarrollo personal</li>
-  <li><strong>Influencia Idealizada</strong>: Actúa como modelo a seguir</li>
-</ul>
+<h2>CRM y Automatización</h2>
+<p>Herramientas para gestionar y automatizar el proceso de ventas.</p>
 
-<h2>Competencias Clave del Líder</h2>
+<h2>Ventas Consultivas</h2>
+<p>El enfoque consultivo en la era digital.</p>
+        `,
+        excerpt: 'Las mejores estrategias para vender en el mundo digital.',
+        featuredImage:
+          'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800',
+        status: 'PUBLISHED',
+        isPinned: false,
+        viewCount: 0,
+        likeCount: 0,
+        publishedAt: new Date('2024-02-20'),
+        authorId: admin.id,
+      },
+    }),
+    prisma.post.upsert({
+      where: { slug: 'calidad-total-empresas' },
+      update: {},
+      create: {
+        title: 'Gestión de Calidad Total en las Empresas',
+        slug: 'calidad-total-empresas',
+        content: `
+<h1>Gestión de Calidad Total en las Empresas</h1>
 
-<ol>
-  <li><strong>Inteligencia Emocional</strong>: Autoconciencia y gestión de emociones</li>
-  <li><strong>Comunicación Efectiva</strong>: Transmite ideas claramente</li>
-  <li><strong>Pensamiento Estratégico</strong>: Visión de largo plazo</li>
-  <li><strong>Adaptabilidad</strong>: Flexibilidad ante cambios</li>
-  <li><strong>Empoderamiento</strong>: Delega y desarrolla talento</li>
-</ol>
+<p>La calidad total es un enfoque integral que involucra a toda la organización en la mejora continua.</p>
 
-<h2>Estrategias de Desarrollo de Liderazgo</h2>
+<h2>Principios de Calidad Total</h2>
+<p>Los fundamentos de la gestión de calidad total.</p>
 
-<p>Para fortalecer tus habilidades de liderazgo:</p>
+<h2>Herramientas de Calidad</h2>
+<p>Las herramientas más efectivas para implementar calidad total.</p>
 
-<ul>
-  <li><strong>Mentoría</strong>: Aprende de líderes experimentados</li>
-  <li><strong>Feedback 360°</strong>: Recibe retroalimentación integral</li>
-  <li><strong>Coaching Ejecutivo</strong>: Desarrollo profesional personalizado</li>
-  <li><strong>Formación Continua</strong>: Cursos y certificaciones</li>
-</ul>
-
-<h2>Liderazgo en la Era Digital</h2>
-
-<ul>
-  <li><strong>Liderazgo Distribuido</strong>: Equipos remotos y virtuales</li>
-  <li><strong>Agilidad Organizacional</strong>: Adaptación rápida a cambios</li>
-  <li><strong>Innovación Constante</strong>: Cultura de mejora continua</li>
-  <li><strong>Diversidad e Inclusión</strong>: Equipos diversos y equitativos</li>
-</ul>
-
-<h2>Impacto del Liderazgo en Resultados</h2>
-
-<p>Un liderazgo efectivo se traduce en:</p>
-
-<ul>
-  <li>Mayor engagement de empleados</li>
-  <li>Mejor performance organizacional</li>
-  <li>Innovación y creatividad</li>
-  <li>Retención de talento</li>
-  <li>Crecimiento sostenible</li>
-</ul>
-
-<p>El liderazgo transformacional no es solo una habilidad, es una filosofía que transforma organizaciones completas hacia la excelencia.</p>
+<h2>Certificaciones ISO</h2>
+<p>Cómo las certificaciones ISO pueden mejorar la gestión de calidad.</p>
         `,
         excerpt:
-          'Descubre las claves del liderazgo transformacional para guiar tu empresa hacia el éxito sostenible.',
+          'Todo sobre la implementación de calidad total en las empresas.',
         featuredImage:
           'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800',
         status: 'PUBLISHED',
         isPinned: false,
-        viewCount: 2100,
-        likeCount: 167,
-        publishedAt: new Date('2024-02-10'),
+        viewCount: 0,
+        likeCount: 0,
+        publishedAt: new Date('2024-02-25'),
+        authorId: admin.id,
+      },
+    }),
+    prisma.post.upsert({
+      where: { slug: 'sostenibilidad-empresarial' },
+      update: {},
+      create: {
+        title: 'Sostenibilidad Empresarial: Más Allá del Greenwashing',
+        slug: 'sostenibilidad-empresarial',
+        content: `
+<h1>Sostenibilidad Empresarial: Más Allá del Greenwashing</h1>
+
+<p>La sostenibilidad empresarial real va más allá de las campañas de marketing. Descubre cómo implementarla correctamente.</p>
+
+<h2>ESG y Sostenibilidad</h2>
+<p>Los criterios ESG y su impacto en la sostenibilidad empresarial.</p>
+
+<h2>Economía Circular</h2>
+<p>Cómo implementar principios de economía circular en tu empresa.</p>
+
+<h2>Medición de Impacto</h2>
+<p>Métricas para medir el impacto real de las iniciativas de sostenibilidad.</p>
+        `,
+        excerpt: 'Cómo implementar sostenibilidad empresarial real y medible.',
+        featuredImage:
+          'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800',
+        status: 'PUBLISHED',
+        isPinned: false,
+        viewCount: 0,
+        likeCount: 0,
+        publishedAt: new Date('2024-03-01'),
+        authorId: admin.id,
+      },
+    }),
+    prisma.post.upsert({
+      where: { slug: 'business-intelligence-datos' },
+      update: {},
+      create: {
+        title: 'Business Intelligence: Transformando Datos en Decisiones',
+        slug: 'business-intelligence-datos',
+        content: `
+<h1>Business Intelligence: Transformando Datos en Decisiones</h1>
+
+<p>El Business Intelligence es clave para tomar decisiones basadas en datos. Aprende a implementarlo correctamente.</p>
+
+<h2>Arquitectura de BI</h2>
+<p>Cómo diseñar una arquitectura de Business Intelligence efectiva.</p>
+
+<h2>Visualización de Datos</h2>
+<p>Las mejores prácticas para visualizar datos de manera efectiva.</p>
+
+<h2>Analytics Predictivo</h2>
+<p>Cómo usar analytics predictivo para anticipar tendencias.</p>
+        `,
+        excerpt:
+          'Todo sobre Business Intelligence y cómo transformar datos en decisiones estratégicas.',
+        featuredImage:
+          'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800',
+        status: 'PUBLISHED',
+        isPinned: false,
+        viewCount: 0,
+        likeCount: 0,
+        publishedAt: new Date('2024-03-05'),
+        authorId: admin.id,
+      },
+    }),
+    prisma.post.upsert({
+      where: { slug: 'compliance-empresarial' },
+      update: {},
+      create: {
+        title: 'Compliance Empresarial: Cumplimiento Normativo',
+        slug: 'compliance-empresarial',
+        content: `
+<h1>Compliance Empresarial: Cumplimiento Normativo</h1>
+
+<p>El compliance empresarial es fundamental para operar de manera legal y ética. Descubre cómo implementarlo.</p>
+
+<h2>Marco Normativo</h2>
+<p>Los principales marcos normativos que afectan a las empresas.</p>
+
+<h2>Programa de Compliance</h2>
+<p>Cómo diseñar e implementar un programa de compliance efectivo.</p>
+
+<h2>Gestión de Riesgos</h2>
+<p>Cómo identificar y gestionar riesgos de compliance.</p>
+        `,
+        excerpt: 'Todo sobre compliance empresarial y cumplimiento normativo.',
+        featuredImage:
+          'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800',
+        status: 'PUBLISHED',
+        isPinned: false,
+        viewCount: 0,
+        likeCount: 0,
+        publishedAt: new Date('2024-03-10'),
+        authorId: admin.id,
+      },
+    }),
+    prisma.post.upsert({
+      where: { slug: 'innovacion-tecnologica-empresas' },
+      update: {},
+      create: {
+        title: 'Innovación Tecnológica en las Empresas',
+        slug: 'innovacion-tecnologica-empresas',
+        content: `
+<h1>Innovación Tecnológica en las Empresas</h1>
+
+<p>La innovación tecnológica es clave para mantenerse competitivo. Descubre cómo fomentarla en tu organización.</p>
+
+<h2>Cultura de Innovación</h2>
+<p>Cómo crear una cultura que fomente la innovación tecnológica.</p>
+
+<h2>Tecnologías Emergentes</h2>
+<p>Las tecnologías que están transformando las empresas.</p>
+
+<h2>ROI de la Innovación</h2>
+<p>Cómo medir el retorno de la inversión en innovación tecnológica.</p>
+        `,
+        excerpt: 'Cómo fomentar la innovación tecnológica en tu empresa.',
+        featuredImage:
+          'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800',
+        status: 'PUBLISHED',
+        isPinned: false,
+        viewCount: 0,
+        likeCount: 0,
+        publishedAt: new Date('2024-03-15'),
+        authorId: admin.id,
+      },
+    }),
+    prisma.post.upsert({
+      where: { slug: 'logistica-cadena-suministro' },
+      update: {},
+      create: {
+        title: 'Logística y Cadena de Suministro Optimizada',
+        slug: 'logistica-cadena-suministro',
+        content: `
+<h1>Logística y Cadena de Suministro Optimizada</h1>
+
+<p>Una cadena de suministro optimizada puede ser la diferencia entre el éxito y el fracaso empresarial.</p>
+
+<h2>Optimización de Inventarios</h2>
+<p>Cómo optimizar los inventarios para reducir costos y mejorar el servicio.</p>
+
+<h2>Logística Verde</h2>
+<p>Estrategias para hacer la logística más sostenible y eficiente.</p>
+
+<h2>Tecnología en Logística</h2>
+<p>Las tecnologías que están revolucionando la logística y cadena de suministro.</p>
+        `,
+        excerpt:
+          'Cómo optimizar la logística y cadena de suministro de tu empresa.',
+        featuredImage:
+          'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800',
+        status: 'PUBLISHED',
+        isPinned: false,
+        viewCount: 0,
+        likeCount: 0,
+        publishedAt: new Date('2024-03-20'),
+        authorId: admin.id,
+      },
+    }),
+    prisma.post.upsert({
+      where: { slug: 'cultura-organizacional-fuerte' },
+      update: {},
+      create: {
+        title: 'Construyendo una Cultura Organizacional Fuerte',
+        slug: 'cultura-organizacional-fuerte',
+        content: `
+<h1>Construyendo una Cultura Organizacional Fuerte</h1>
+
+<p>Una cultura organizacional fuerte es la base del éxito empresarial a largo plazo.</p>
+
+<h2>Elementos de la Cultura</h2>
+<p>Los elementos fundamentales que definen la cultura organizacional.</p>
+
+<h2>Cambio Cultural</h2>
+<p>Cómo liderar el cambio cultural en las organizaciones.</p>
+
+<h2>Medición de Cultura</h2>
+<p>Herramientas para medir y evaluar la cultura organizacional.</p>
+        `,
+        excerpt: 'Cómo construir y mantener una cultura organizacional fuerte.',
+        featuredImage:
+          'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800',
+        status: 'PUBLISHED',
+        isPinned: false,
+        viewCount: 0,
+        likeCount: 0,
+        publishedAt: new Date('2024-03-25'),
         authorId: admin.id,
       },
     }),
   ]);
 
-  console.log('✅ Posts creados');
+  console.log('✅ 15 posts creados');
 
-  // Asignar categorías a posts
-  await Promise.all([
-    // Post 1: Estrategias de Crecimiento - Consultoría Empresarial
-    prisma.postCategory.upsert({
-      where: {
-        postId_categoryId: {
-          postId: posts[0].id,
-          categoryId: categories[0].id, // Consultoría Empresarial
-        },
-      },
-      update: {},
-      create: {
-        postId: posts[0].id,
-        categoryId: categories[0].id,
-      },
-    }),
+  // Asignar categorías a los posts
+  const postCategoryAssignments = [
+    // Post 1: Estrategias de crecimiento
+    {
+      postSlug: 'estrategias-crecimiento-empresarial',
+      categorySlugs: ['consultoria-empresarial', 'liderazgo-gestion'],
+    },
+    // Post 2: Transformación digital
+    {
+      postSlug: 'transformacion-digital-empresas',
+      categorySlugs: ['tecnologia-innovacion', 'consultoria-empresarial'],
+    },
+    // Post 3: Gestión de talento
+    {
+      postSlug: 'gestion-talento-humano',
+      categorySlugs: ['recursos-humanos', 'liderazgo-gestion'],
+    },
+    // Post 4: Marketing digital
+    {
+      postSlug: 'marketing-digital-estrategias',
+      categorySlugs: ['marketing-digital', 'ventas-comercial'],
+    },
+    // Post 5: Finanzas corporativas
+    {
+      postSlug: 'finanzas-corporativas-modernas',
+      categorySlugs: ['finanzas-corporativas', 'analisis-datos'],
+    },
+    // Post 6: Liderazgo transformacional
+    {
+      postSlug: 'liderazgo-transformacional',
+      categorySlugs: ['liderazgo-gestion', 'recursos-humanos'],
+    },
+    // Post 7: Optimización de procesos
+    {
+      postSlug: 'optimizacion-procesos-operativos',
+      categorySlugs: ['operaciones-logistica', 'calidad-procesos'],
+    },
+    // Post 8: Ventas digitales
+    {
+      postSlug: 'ventas-digitales-estrategias',
+      categorySlugs: ['ventas-comercial', 'marketing-digital'],
+    },
+    // Post 9: Calidad total
+    {
+      postSlug: 'calidad-total-empresas',
+      categorySlugs: ['calidad-procesos', 'operaciones-logistica'],
+    },
+    // Post 10: Sostenibilidad
+    {
+      postSlug: 'sostenibilidad-empresarial',
+      categorySlugs: ['sostenibilidad-rse', 'compliance-legal'],
+    },
+    // Post 11: Business Intelligence
+    {
+      postSlug: 'business-intelligence-datos',
+      categorySlugs: ['analisis-datos', 'tecnologia-innovacion'],
+    },
+    // Post 12: Compliance
+    {
+      postSlug: 'compliance-empresarial',
+      categorySlugs: ['compliance-legal', 'sostenibilidad-rse'],
+    },
+    // Post 13: Innovación tecnológica
+    {
+      postSlug: 'innovacion-tecnologica-empresas',
+      categorySlugs: ['tecnologia-innovacion', 'analisis-datos'],
+    },
+    // Post 14: Logística
+    {
+      postSlug: 'logistica-cadena-suministro',
+      categorySlugs: ['operaciones-logistica', 'calidad-procesos'],
+    },
+    // Post 15: Cultura organizacional
+    {
+      postSlug: 'cultura-organizacional-fuerte',
+      categorySlugs: ['liderazgo-gestion', 'recursos-humanos'],
+    },
+  ];
 
-    // Post 2: Gestión Financiera - Finanzas Corporativas
-    prisma.postCategory.upsert({
-      where: {
-        postId_categoryId: {
-          postId: posts[1].id,
-          categoryId: categories[1].id, // Finanzas Corporativas
-        },
-      },
-      update: {},
-      create: {
-        postId: posts[1].id,
-        categoryId: categories[1].id,
-      },
-    }),
-
-    // Post 3: Gestión del Talento - Recursos Humanos
-    prisma.postCategory.upsert({
-      where: {
-        postId_categoryId: {
-          postId: posts[2].id,
-          categoryId: categories[2].id, // Recursos Humanos
-        },
-      },
-      update: {},
-      create: {
-        postId: posts[2].id,
-        categoryId: categories[2].id,
-      },
-    }),
-
-    // Post 4: Marketing Digital - Marketing Estratégico
-    prisma.postCategory.upsert({
-      where: {
-        postId_categoryId: {
-          postId: posts[3].id,
-          categoryId: categories[3].id, // Marketing Estratégico
-        },
-      },
-      update: {},
-      create: {
-        postId: posts[3].id,
-        categoryId: categories[3].id,
-      },
-    }),
-
-    // Post 5: Optimización de Procesos - Operaciones
-    prisma.postCategory.upsert({
-      where: {
-        postId_categoryId: {
-          postId: posts[4].id,
-          categoryId: categories[4].id, // Operaciones
-        },
-      },
-      update: {},
-      create: {
-        postId: posts[4].id,
-        categoryId: categories[4].id,
-      },
-    }),
-
-    // Post 6: Liderazgo Transformacional - Liderazgo
-    prisma.postCategory.upsert({
-      where: {
-        postId_categoryId: {
-          postId: posts[5].id,
-          categoryId: categories[5].id, // Liderazgo
-        },
-      },
-      update: {},
-      create: {
-        postId: posts[5].id,
-        categoryId: categories[5].id,
-      },
-    }),
-  ]);
+  for (const assignment of postCategoryAssignments) {
+    const post = posts.find((p) => p.slug === assignment.postSlug);
+    if (post) {
+      for (const categorySlug of assignment.categorySlugs) {
+        const category = categories.find((c) => c.slug === categorySlug);
+        if (category) {
+          await prisma.postCategory.upsert({
+            where: {
+              postId_categoryId: {
+                postId: post.id,
+                categoryId: category.id,
+              },
+            },
+            update: {},
+            create: {
+              postId: post.id,
+              categoryId: category.id,
+            },
+          });
+        }
+      }
+    }
+  }
 
   console.log('✅ Categorías asignadas a posts');
 
-  // Crear comentarios de ejemplo
-  await Promise.all([
-    prisma.comment.create({
-      data: {
-        content:
-          'Excelente guía sobre crecimiento empresarial! Las métricas que mencionas son clave para medir el éxito. ¿Podrías profundizar más en el análisis de mercado?',
-        authorName: 'Roberto Martínez',
-        authorEmail: 'roberto.martinez@empresa.com',
-        authorWebsite: 'https://robertomartinez.com',
-        status: 'APPROVED',
-        postId: posts[0].id,
-      },
-    }),
-    prisma.comment.create({
-      data: {
-        content:
-          'Muy útil la información sobre gestión financiera. Estoy implementando un ERP en mi empresa y estos conceptos me ayudan mucho.',
-        authorName: 'Carmen López',
-        authorEmail: 'carmen.lopez@finanzas.com',
-        status: 'APPROVED',
-        postId: posts[1].id,
-      },
-    }),
-    prisma.comment.create({
-      data: {
-        content:
-          'El tema de gestión del talento es fundamental. ¿Tienes experiencia con herramientas específicas de ATS que recomiendes?',
-        authorName: 'Diego Ramírez',
-        authorEmail: 'diego.ramirez@rrhh.com',
-        status: 'PENDING',
-        postId: posts[2].id,
-      },
-    }),
-    prisma.comment.create({
-      data: {
-        content:
-          'Las tendencias de marketing digital 2024 que mencionas son muy actuales. ¿Cómo ves el impacto de la IA en el marketing estratégico?',
-        authorName: 'Sofia Herrera',
-        authorEmail: 'sofia.herrera@marketing.com',
-        status: 'APPROVED',
-        postId: posts[3].id,
-      },
-    }),
-    prisma.comment.create({
-      data: {
-        content:
-          'Lean Six Sigma es una metodología que he implementado con éxito en mi empresa. ¿Podrías compartir más sobre Value Stream Mapping?',
-        authorName: 'Andrés Vega',
-        authorEmail: 'andres.vega@operaciones.com',
-        status: 'APPROVED',
-        postId: posts[4].id,
-      },
-    }),
-    prisma.comment.create({
-      data: {
-        content:
-          'El liderazgo transformacional es clave en la era digital. Me interesa mucho el tema de equipos remotos. ¿Tienes algún artículo específico sobre eso?',
-        authorName: 'María González',
-        authorEmail: 'maria.gonzalez@liderazgo.com',
-        status: 'APPROVED',
-        postId: posts[5].id,
-      },
-    }),
-  ]);
+  // Crear comentarios para cada post (entre 5 y 10 comentarios por post)
+  const commentAuthors = [
+    {
+      name: 'María González',
+      email: 'maria.gonzalez@email.com',
+      website: 'https://mariagonzalez.com',
+    },
+    {
+      name: 'Carlos Rodríguez',
+      email: 'carlos.rodriguez@email.com',
+      website: 'https://carlosrodriguez.com',
+    },
+    {
+      name: 'Ana Martínez',
+      email: 'ana.martinez@email.com',
+      website: 'https://anamartinez.com',
+    },
+    {
+      name: 'Luis Fernández',
+      email: 'luis.fernandez@email.com',
+      website: 'https://luisfernandez.com',
+    },
+    {
+      name: 'Sofia López',
+      email: 'sofia.lopez@email.com',
+      website: 'https://sofialopez.com',
+    },
+    {
+      name: 'Diego Pérez',
+      email: 'diego.perez@email.com',
+      website: 'https://diegoperez.com',
+    },
+    {
+      name: 'Laura Sánchez',
+      email: 'laura.sanchez@email.com',
+      website: 'https://laurasanchez.com',
+    },
+    {
+      name: 'Miguel Torres',
+      email: 'miguel.torres@email.com',
+      website: 'https://migueltorres.com',
+    },
+    {
+      name: 'Carmen Ruiz',
+      email: 'carmen.ruiz@email.com',
+      website: 'https://carmenruiz.com',
+    },
+    {
+      name: 'Javier Morales',
+      email: 'javier.morales@email.com',
+      website: 'https://javiermorales.com',
+    },
+    {
+      name: 'Isabel Jiménez',
+      email: 'isabel.jimenez@email.com',
+      website: 'https://isabeljimenez.com',
+    },
+    {
+      name: 'Roberto Vargas',
+      email: 'roberto.vargas@email.com',
+      website: 'https://robertovargas.com',
+    },
+    {
+      name: 'Patricia Herrera',
+      email: 'patricia.herrera@email.com',
+      website: 'https://patriciaherrera.com',
+    },
+    {
+      name: 'Fernando Castro',
+      email: 'fernando.castro@email.com',
+      website: 'https://fernandocastro.com',
+    },
+    {
+      name: 'Monica Vega',
+      email: 'monica.vega@email.com',
+      website: 'https://monicavega.com',
+    },
+  ];
 
-  console.log('✅ Comentarios creados');
+  const commentTemplates = [
+    'Excelente artículo, muy informativo y bien estructurado.',
+    'Muy útil para mi trabajo, gracias por compartir esta información.',
+    'Interesante perspectiva, nunca había pensado en este enfoque.',
+    'Muy bien explicado, fácil de entender incluso para principiantes.',
+    'Gracias por estos consejos prácticos, los implementaré en mi empresa.',
+    'Excelente contenido, espero más artículos como este.',
+    'Muy relevante para el mercado actual, gracias por la actualización.',
+    'Buen análisis, me ayudó a entender mejor el tema.',
+    'Información valiosa, definitivamente lo recomendaré a mis colegas.',
+    'Muy completo el artículo, cubre todos los aspectos importantes.',
+    'Excelente trabajo, se nota la experiencia en el tema.',
+    'Muy práctico, puedo aplicar estos conceptos inmediatamente.',
+    'Bien documentado y con ejemplos claros, felicitaciones.',
+    'Muy interesante, me gustaría saber más sobre este tema.',
+    'Excelente calidad de contenido, seguiré leyendo sus artículos.',
+  ];
 
-  console.log('🎉 Seed completo ejecutado correctamente!');
-  console.log('📧 Usuario admin: admin@copexia.com');
-  console.log('🔑 Contraseña: Pass1234');
+  for (const post of posts) {
+    const numComments = Math.floor(Math.random() * 6) + 5; // Entre 5 y 10 comentarios
+
+    for (let i = 0; i < numComments; i++) {
+      const randomAuthor =
+        commentAuthors[Math.floor(Math.random() * commentAuthors.length)];
+      const randomTemplate =
+        commentTemplates[Math.floor(Math.random() * commentTemplates.length)];
+
+      await prisma.comment.create({
+        data: {
+          content: randomTemplate,
+          authorName: randomAuthor.name,
+          authorEmail: randomAuthor.email,
+          authorWebsite: randomAuthor.website,
+          status: Math.random() > 0.3 ? 'APPROVED' : 'PENDING', // 70% aprobados, 30% pendientes
+          postId: post.id,
+        },
+      });
+    }
+  }
+
+  console.log('✅ Comentarios creados para todos los posts');
+
+  console.log('🎉 Seed completado exitosamente!');
+  console.log(`📊 Resumen:`);
+  console.log(`   - 1 usuario admin`);
+  console.log(`   - 12 categorías`);
+  console.log(`   - 15 posts`);
+  console.log(`   - Comentarios: entre 5-10 por post`);
+  console.log(`   - Visualizaciones: 0 para todos los posts`);
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Error en seed:', e);
+    console.error(e);
     process.exit(1);
   })
   .finally(async () => {

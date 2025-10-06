@@ -6,6 +6,7 @@ import { UploadModule } from 'src/services/aws/aws.module';
 import { PrismaModule } from '../../services/prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
 import { CategoriesModule } from '../categories/categories.module';
+import { CommentsModule } from '../comments/comments.module';
 import { PostsModule } from '../posts/posts.module';
 import { UsersModule } from '../users/users.module';
 import { AppController } from './app.controller';
@@ -25,7 +26,7 @@ import { AppService } from './app.service';
     UsersModule,
     PostsModule,
     CategoriesModule,
-
+    CommentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

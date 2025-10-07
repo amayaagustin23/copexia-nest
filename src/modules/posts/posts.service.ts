@@ -4,7 +4,6 @@ import { paginatePrisma } from '../../common/pagination';
 import { PaginationArgs } from '../../common/pagination/pagination.interface';
 import { PrismaService } from '../../services/prisma/prisma.service';
 import { generateSlug } from '../../utils/slug.utils';
-import { CreateCommentDto } from './dto/create-comment.dto';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 
@@ -228,14 +227,6 @@ export class PostsService {
         categories: {
           include: { category: true },
         },
-        comments: {
-          where: { status: CommentStatus.APPROVED },
-          include: {
-            replies: {
-              where: { status: CommentStatus.APPROVED },
-            },
-          },
-        },
       },
     });
 
@@ -243,17 +234,19 @@ export class PostsService {
       throw new NotFoundException('Post no encontrado');
     }
 
+    const commentCount = await this.prisma.comment.count({
+      where: {
+        postId: post.id,
+        status: CommentStatus.APPROVED,
+        parentId: null,
+      },
+    });
+
     // Incrementar contador de vistas
     await this.prisma.post.update({
       where: { id: post.id },
       data: { viewCount: { increment: 1 } },
     });
-
-    // Calcular commentCount dinámicamente
-    const commentCount = (post as any).comments.reduce(
-      (total: number, comment: any) => total + 1 + comment.replies.length,
-      0,
-    );
 
     return {
       ...post,
@@ -395,62 +388,6 @@ export class PostsService {
     });
 
     return { viewCount: updatedPost.viewCount };
-  }
-
-  async createComment(postId: string, createCommentDto: CreateCommentDto) {
-    const post = await this.prisma.post.findUnique({
-      where: { id: postId },
-    });
-
-    if (!post || post.status !== PostStatus.PUBLISHED) {
-      throw new NotFoundException('Post no encontrado');
-    }
-
-    if (createCommentDto.parentId) {
-      const parentComment = await this.prisma.comment.findUnique({
-        where: { id: createCommentDto.parentId },
-      });
-
-      if (!parentComment || parentComment.postId !== postId) {
-        throw new BadRequestException('Comentario padre no válido');
-      }
-    }
-
-    const comment = await this.prisma.comment.create({
-      data: {
-        content: createCommentDto.content,
-        authorName: createCommentDto.authorName,
-        status: CommentStatus.APPROVED,
-        authorEmail: createCommentDto.authorEmail,
-        authorWebsite: createCommentDto.authorWebsite,
-        ...(createCommentDto.parentId && {
-          parent: {
-            connect: { id: createCommentDto.parentId },
-          },
-        }),
-        post: {
-          connect: { id: postId },
-        },
-      },
-    });
-
-    return comment;
-  }
-
-  async getComments(postId: string) {
-    return this.prisma.comment.findMany({
-      where: {
-        postId,
-        status: CommentStatus.APPROVED,
-        parentId: null, // Solo comentarios principales
-      },
-      include: {
-        replies: {
-          where: { status: CommentStatus.APPROVED },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
   }
 
   async getStats() {

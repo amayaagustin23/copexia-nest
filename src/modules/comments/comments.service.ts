@@ -11,7 +11,6 @@ export class CommentsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createCommentDto: CreateCommentDto) {
-    // Verificar que el post existe
     const post = await this.prisma.post.findUnique({
       where: { id: createCommentDto.postId },
     });
@@ -20,7 +19,6 @@ export class CommentsService {
       throw new NotFoundException('Post no encontrado');
     }
 
-    // Si es una respuesta, verificar que el comentario padre existe
     if (createCommentDto.parentId) {
       const parentComment = await this.prisma.comment.findUnique({
         where: { id: createCommentDto.parentId },
@@ -30,7 +28,6 @@ export class CommentsService {
         throw new NotFoundException('Comentario padre no encontrado');
       }
 
-      // Verificar que el comentario padre pertenece al mismo post
       if (parentComment.postId !== createCommentDto.postId) {
         throw new BadRequestException(
           'El comentario padre debe pertenecer al mismo post',
@@ -39,7 +36,15 @@ export class CommentsService {
     }
 
     const comment = await this.prisma.comment.create({
-      data: createCommentDto,
+      data: {
+        content: createCommentDto.content,
+        authorName: createCommentDto.authorName,
+        authorEmail: createCommentDto.authorEmail || null,
+        authorWebsite: createCommentDto.authorWebsite || null,
+        postId: createCommentDto.postId,
+        status: CommentStatus.APPROVED,
+        parentId: createCommentDto.parentId || null,
+      },
       include: {
         post: {
           select: {
@@ -63,6 +68,7 @@ export class CommentsService {
             authorEmail: true,
             authorWebsite: true,
             status: true,
+            parentId: true,
             createdAt: true,
             updatedAt: true,
           },
@@ -122,6 +128,7 @@ export class CommentsService {
               authorEmail: true,
               authorWebsite: true,
               status: true,
+              parentId: true,
               createdAt: true,
               updatedAt: true,
             },
@@ -161,8 +168,7 @@ export class CommentsService {
     };
   }
 
-  async findAllByPost(postId: string, pagination: PaginationArgs) {
-    // Verificar que el post existe
+  async findAllByPost(postId: string) {
     const post = await this.prisma.post.findUnique({
       where: { id: postId },
     });
@@ -171,40 +177,33 @@ export class CommentsService {
       throw new NotFoundException('Post no encontrado');
     }
 
-    const where: any = {
-      postId,
-      status: CommentStatus.APPROVED,
-      parentId: null, // Solo comentarios principales, no respuestas
-    };
-
-    const orderBy: any = { createdAt: 'desc' };
-
-    const result = await paginatePrisma(
-      this.prisma.comment,
-      {
-        where,
-        include: {
-          replies: {
-            where: { status: CommentStatus.APPROVED },
-            select: {
-              id: true,
-              content: true,
-              authorName: true,
-              authorEmail: true,
-              authorWebsite: true,
-              status: true,
-              createdAt: true,
-              updatedAt: true,
-            },
-            orderBy: { createdAt: 'asc' },
-          },
-        },
-        orderBy,
+    const comments = await this.prisma.comment.findMany({
+      where: {
+        postId,
+        status: CommentStatus.APPROVED,
+        parentId: null,
       },
-      pagination,
-    );
+      include: {
+        replies: {
+          where: { status: CommentStatus.APPROVED },
+          select: {
+            id: true,
+            content: true,
+            authorName: true,
+            authorEmail: true,
+            authorWebsite: true,
+            status: true,
+            parentId: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+          orderBy: { createdAt: 'asc' },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
 
-    return result;
+    return comments;
   }
 
   async findOne(id: string) {

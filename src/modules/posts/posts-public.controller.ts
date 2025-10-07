@@ -9,9 +9,10 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PaginationArgs } from 'src/common/pagination/pagination.interface';
-import { CreateCommentDto } from './dto/create-comment.dto';
+import { CommentsService } from '../comments/comments.service';
+import { CommentListResponseDto } from '../comments/dto/comment-response.dto';
+import { CreateCommentDto } from '../comments/dto/create-comment.dto';
 import {
-  CommentResponseDto,
   ErrorResponseDto,
   LikeResponseDto,
   PaginatedPostListResponseDto,
@@ -22,7 +23,10 @@ import { PostsService } from './posts.service';
 @ApiTags('Posts Públicos')
 @Controller('public/posts')
 export class PostsPublicController {
-  constructor(private readonly postsService: PostsService) {}
+  constructor(
+    private readonly postsService: PostsService,
+    private readonly commentsService: CommentsService,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Obtener todos los posts públicos' })
@@ -104,7 +108,7 @@ export class PostsPublicController {
   @ApiResponse({
     status: 201,
     description: 'Comentario creado',
-    type: CommentResponseDto,
+    type: CommentListResponseDto,
   })
   @ApiResponse({
     status: 400,
@@ -120,7 +124,12 @@ export class PostsPublicController {
     @Param('id') id: string,
     @Body() createCommentDto: CreateCommentDto,
   ) {
-    return this.postsService.createComment(id, createCommentDto);
+    // Crear un nuevo objeto con el postId incluido
+    const commentData = {
+      ...createCommentDto,
+      postId: id,
+    };
+    return this.commentsService.create(commentData);
   }
 
   @Get(':id/comments')
@@ -128,7 +137,7 @@ export class PostsPublicController {
   @ApiResponse({
     status: 200,
     description: 'Comentarios obtenidos',
-    type: [CommentResponseDto],
+    type: CommentListResponseDto,
   })
   @ApiResponse({
     status: 404,
@@ -136,7 +145,7 @@ export class PostsPublicController {
     type: ErrorResponseDto,
   })
   getComments(@Param('id') id: string) {
-    return this.postsService.getComments(id);
+    return this.commentsService.findAllByPost(id);
   }
 
   @Post(':id/view')

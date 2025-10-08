@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { CommentStatus, PostStatus } from '@prisma/client';
 import { paginatePrisma } from '../../common/pagination';
 import { PaginationArgs } from '../../common/pagination/pagination.interface';
+import { EmailService } from '../../services/email/email.service';
 import { PrismaService } from '../../services/prisma/prisma.service';
 import { generateSlug } from '../../utils/slug.utils';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -9,7 +10,10 @@ import { UpdatePostDto } from './dto/update-post.dto';
 
 @Injectable()
 export class PostsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly emailService: EmailService,
+  ) {}
 
   async create(createPostDto: CreatePostDto, authorId: string) {
     const { categoryIds, ...postData } = createPostDto;
@@ -387,7 +391,116 @@ export class PostsService {
       data: { viewCount: { increment: 1 } },
     });
 
+    // Verificar si se alcanzó un hito de visualizaciones
+    await this.checkViewMilestones(updatedPost);
+
     return { viewCount: updatedPost.viewCount };
+  }
+
+  private async checkViewMilestones(post: any) {
+    const viewCount = post.viewCount;
+
+    // Verificar si es un múltiplo de 100 o 1000
+    const isHundredMilestone = viewCount > 0 && viewCount % 100 === 0;
+    const isThousandMilestone = viewCount > 0 && viewCount % 1000 === 0;
+
+    if (isHundredMilestone || isThousandMilestone) {
+      try {
+        await this.emailService.sendViewMilestoneNotification(
+          post.title,
+          post.slug,
+          viewCount,
+        );
+      } catch (error) {
+        console.error(
+          'Error enviando notificación de hito de visualizaciones:',
+          error,
+        );
+        // No lanzar error para no interrumpir el flujo principal
+      }
+    }
+  }
+
+  // Método para probar notificaciones de visualizaciones
+  async testViewMilestoneNotifications() {
+    try {
+      // Importar EmailService dinámicamente
+      const { EmailService } = await import(
+        '../../services/email/email.service'
+      );
+      const { ConfigService } = await import('@nestjs/config');
+
+      const configService = new ConfigService();
+      const emailService = new EmailService(configService);
+
+      const results = {
+        hundredMilestone: false,
+        thousandMilestone: false,
+      };
+
+      // 1. Probar notificación de 100 visualizaciones
+      results.hundredMilestone =
+        await emailService.sendViewMilestoneNotification(
+          'Post de Prueba - 100 Visualizaciones',
+          'test-post-100-views',
+          100,
+        );
+
+      // 2. Probar notificación de 1000 visualizaciones
+      results.thousandMilestone =
+        await emailService.sendViewMilestoneNotification(
+          'Post de Prueba - 1000 Visualizaciones',
+          'test-post-1000-views',
+          1000,
+        );
+
+      return {
+        success: true,
+        message: 'Notificaciones de visualizaciones enviadas',
+        results,
+        sentTo: 'atomix18@gmail.com',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Error al enviar notificaciones de visualizaciones',
+        error: error.message,
+      };
+    }
+  }
+
+  // Método para simular visualizaciones hasta el próximo hito
+  async simulateViewsToMilestone(postId: string) {
+    try {
+      // Obtener el post actual para ver cuántas visualizaciones tiene
+      const currentPost = await this.findOne(postId);
+      const currentViews = currentPost.viewCount;
+
+      // Calcular cuántas visualizaciones necesitamos para llegar al próximo hito
+      const nextHundred = Math.ceil((currentViews + 1) / 100) * 100;
+      const viewsNeeded = nextHundred - currentViews;
+
+      // Simular las visualizaciones necesarias
+      const results = [];
+      for (let i = 0; i < viewsNeeded; i++) {
+        const result = await this.incrementView(postId);
+        results.push(result);
+      }
+
+      return {
+        success: true,
+        message: `Simuladas ${viewsNeeded} visualizaciones para llegar a ${nextHundred} visualizaciones`,
+        currentViews: currentViews,
+        targetViews: nextHundred,
+        results: results[results.length - 1], // Último resultado
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Error al simular visualizaciones',
+        error: error.message,
+      };
+    }
   }
 
   async getStats() {

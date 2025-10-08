@@ -37,7 +37,7 @@ async function bootstrap() {
   app.useGlobalFilters(new ValidationErrorExceptionFilter());
   app.useGlobalInterceptors(
     new ClassSerializerInterceptor(app.get(Reflector), {
-      excludePrefixes: ['password', 'updatedAt', 'isDeleted'],
+      excludePrefixes: ['password', 'updatedAt'],
       ignoreDecorators: true,
     }),
   );

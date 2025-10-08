@@ -1,0 +1,783 @@
+{
+  "info": {
+    "name": "nestjsbase",
+    "description": "Colección generada automáticamente para nestjsbase",
+    "version": "0.0.1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:4000",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "admin_email",
+      "value": "admin@example.com",
+      "type": "string"
+    },
+    {
+      "key": "admin_password",
+      "value": "password123",
+      "type": "string"
+    },
+    {
+      "key": "sample_id",
+      "value": "123e4567-e89b-12d3-a456-426614174000",
+      "type": "string"
+    },
+    {
+      "key": "sample_category_id",
+      "value": "123e4567-e89b-12d3-a456-426614174000",
+      "type": "string"
+    },
+    {
+      "key": "sample_post_id",
+      "value": "123e4567-e89b-12d3-a456-426614174000",
+      "type": "string"
+    },
+    {
+      "key": "sample_user_id",
+      "value": "123e4567-e89b-12d3-a456-426614174000",
+      "type": "string"
+    },
+    {
+      "key": "api_key",
+      "value": "your-api-key-here",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "POST login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@gmail.com\",\n  \"password\": \"Pass1234\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Recover password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}auth/recover-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "recover-password"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@gmail.com\",\n  \"password\": \"Pass1234\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reset password with token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}auth/reset-password/:token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "reset-password",
+                ":token"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@gmail.com\",\n  \"password\": \"Pass1234\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout user and clear cookies",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}auth/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@gmail.com\",\n  \"password\": \"Pass1234\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Info user logged",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}auth/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "status"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Crear una nueva categoría",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}admin/categories",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "categories"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"name\": \"Tecnología\",\n  \"slug\": \"tecnologia\",\n  \"description\": \"Artículos sobre tecnología, programación y desarrollo\",\n  \"color\": \"#3b82f6\",\n  \"icon\": \"💻\",\n  \"isActive\": true,\n  \"sortOrder\": 1,\n  \"createdAt\": \"2024-01-15T10:30:00.000Z\",\n  \"updatedAt\": \"2024-01-15T10:30:00.000Z\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener todas las categorías",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}admin/categories",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener estadísticas de categorías",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}admin/categories/stats",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "categories",
+                "stats"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener categoría por slug",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}admin/categories/slug/:slug",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "categories",
+                "slug",
+                ":slug"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener categoría por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}admin/categories/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "categories",
+                ":id"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar categoría",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}admin/categories/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "categories",
+                ":id"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"name\": \"Tecnología\",\n  \"slug\": \"tecnologia\",\n  \"description\": \"Artículos sobre tecnología, programación y desarrollo\",\n  \"color\": \"#3b82f6\",\n  \"icon\": \"💻\",\n  \"isActive\": true,\n  \"sortOrder\": 1,\n  \"createdAt\": \"2024-01-15T10:30:00.000Z\",\n  \"updatedAt\": \"2024-01-15T10:30:00.000Z\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar categoría",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}admin/categories/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "categories",
+                ":id"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "PostsAdmin",
+      "item": [
+        {
+          "name": "Crear un nuevo post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}admin/posts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "posts"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Excelente artículo! NestJS realmente simplifica mucho el desarrollo backend.\",\n  \"authorName\": \"Carlos Mendoza\",\n  \"authorEmail\": \"carlos.mendoza@email.com\",\n  \"authorWebsite\": \"https://carlosdev.com\",\n  \"parentId\": \"123e4567-e89b-12d3-a456-426614174000\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener todos los posts (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}admin/posts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "posts"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Número de página"
+                },
+                {
+                  "key": "perPage",
+                  "value": "10",
+                  "description": "Elementos por página"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Término de búsqueda",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener estadísticas de posts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}admin/posts/stats",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "posts",
+                "stats"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener post por ID (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}admin/posts/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "posts",
+                ":id"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar post",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}admin/posts/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "posts",
+                ":id"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Excelente artículo! NestJS realmente simplifica mucho el desarrollo backend.\",\n  \"authorName\": \"Carlos Mendoza\",\n  \"authorEmail\": \"carlos.mendoza@email.com\",\n  \"authorWebsite\": \"https://carlosdev.com\",\n  \"parentId\": \"123e4567-e89b-12d3-a456-426614174000\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar post",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}admin/posts/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "posts",
+                ":id"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "PostsPublic",
+      "item": [
+        {
+          "name": "Obtener todos los posts públicos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}public/posts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "public",
+                "posts"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Número de página"
+                },
+                {
+                  "key": "perPage",
+                  "value": "10",
+                  "description": "Elementos por página"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Término de búsqueda",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener post por slug",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}public/posts/slug/:slug",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "public",
+                "posts",
+                "slug",
+                ":slug"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener post por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}public/posts/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "public",
+                "posts",
+                ":id"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Dar like a un post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}public/posts/:id/like",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "public",
+                "posts",
+                ":id",
+                "like"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Excelente artículo! NestJS realmente simplifica mucho el desarrollo backend.\",\n  \"authorName\": \"Carlos Mendoza\",\n  \"authorEmail\": \"carlos.mendoza@email.com\",\n  \"authorWebsite\": \"https://carlosdev.com\",\n  \"parentId\": \"123e4567-e89b-12d3-a456-426614174000\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Quitar like de un post",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}public/posts/:id/like",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "public",
+                "posts",
+                ":id",
+                "like"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear comentario en un post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}public/posts/:id/comments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "public",
+                "posts",
+                ":id",
+                "comments"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Excelente artículo! NestJS realmente simplifica mucho el desarrollo backend.\",\n  \"authorName\": \"Carlos Mendoza\",\n  \"authorEmail\": \"carlos.mendoza@email.com\",\n  \"authorWebsite\": \"https://carlosdev.com\",\n  \"parentId\": \"123e4567-e89b-12d3-a456-426614174000\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener comentarios de un post",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}public/posts/:id/comments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "public",
+                "posts",
+                ":id",
+                "comments"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

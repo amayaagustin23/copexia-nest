@@ -1,41 +1,44 @@
 import {
-	Body,
-	Controller,
-	Delete,
-	Get,
-	Param,
-	Patch,
-	Query,
-	UseGuards
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Query,
+  UseGuards,
 } from '@nestjs/common';
 import {
-	ApiBearerAuth,
-	ApiOperation,
-	ApiParam,
-	ApiQuery,
-	ApiResponse,
-	ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
 } from '@nestjs/swagger';
 import { CommentStatus } from '@prisma/client';
 import { GetCurrentUser } from '../../common/decorators/get-current-user.decorator';
 import { HasRoles } from '../../common/decorators/has-roles.decorator';
 import { PaginationArgs } from '../../common/pagination/pagination.interface';
 import { Role } from '../../constants';
+import { EmailService } from '../../services/email/email.service';
 import { AccessTokenGuard } from '../auth/guards/access-token.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { CommentsService } from './comments.service';
 import {
-	CommentListResponseDto,
-	CommentResponseDto,
-	CommentStatsDto,
+  CommentListResponseDto,
+  CommentResponseDto,
+  CommentStatsDto,
 } from './dto/comment-response.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 
 @ApiTags('Comments')
 @Controller('admin/comments')
 export class CommentsController {
-  constructor(private readonly commentsService: CommentsService) {}
-
+  constructor(
+    private readonly commentsService: CommentsService,
+    private readonly emailService: EmailService,
+  ) {}
 
   // ******** ADMIN: LISTAR TODOS LOS COMENTARIOS ********
   @Get()

@@ -1,0 +1,90 @@
+services:
+  # Base de datos PostgreSQL para desarrollo
+  postgres:
+    image: postgres:15-alpine
+    container_name: copexia-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: copexia_db_dev
+      POSTGRES_USER: copexia_user
+      POSTGRES_PASSWORD: copexia_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    networks:
+      - copexia-dev-network
+
+  # Aplicación NestJS en modo desarrollo
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: copexia-app-dev
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DATABASE_URL: postgresql://copexia_user:copexia_password@postgres:5432/copexia_db_dev
+      JWT_SECRET_KEY: dev-jwt-secret-key-very-long-and-secure-for-development
+      JWT_REFRESH_SECRET_KEY: dev-refresh-secret-key-very-long-and-secure-for-development
+      JWT_RESET_SECRET_KEY: dev-reset-secret-key-very-long-and-secure-for-development
+      JWT_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+      JWT_RESET_EXPIRES_IN: 1h
+      HASH_SALT: 10
+      # Mailjet Configuration
+      EMAIL_SENDER: atomix18@gmail.com
+      MAILJET_API_KEY: 7586a4f262572d5b593499f681168398
+      MAILJET_SECRET_KEY: 395702c3b9e04bf03903429b214d9d60
+      BACKOFFICE_RESET_PASSWORD_URL: http://localhost:3001/es/reset-password
+      BACKOFFICE_BASE_URL: http://localhost:3001/es
+      FRONTEND_URL: http://localhost:3001
+      API_URL: http://localhost:3000/api/v1
+      # AWS Configuration (para desarrollo local, usar valores de prueba)
+      AWS_ACCESS_KEY_ID: your-aws-access-key
+      AWS_SECRET_ACCESS_KEY: your-aws-secret-key
+      AWS_REGION: us-east-1
+      S3_BUCKET: your-s3-bucket-name
+      # I18n Configuration
+      I18N_LANGUAGE: en
+      I18N_FALLBACK_LANGUAGE: es
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    networks:
+      - copexia-dev-network
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - ./uploads:/app/uploads
+    command: yarn start:dev
+
+  # pgAdmin para gestión de base de datos
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: copexia-pgadmin-dev
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@copexia.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - copexia-dev-network
+    volumes:
+      - pgadmin_dev_data:/var/lib/pgadmin
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  postgres_dev_data:
+  pgadmin_dev_data:
+
+networks:
+  copexia-dev-network:
+    driver: bridge

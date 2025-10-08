@@ -41,6 +41,33 @@ import { PostsService } from './posts.service';
 export class PostsAdminController {
   constructor(private readonly postsService: PostsService) {}
 
+  // ******** ADMIN: PROBAR NOTIFICACIONES DE VISUALIZACIONES ********
+  @Post('test-view-notifications')
+  @ApiOperation({
+    summary: 'Probar notificaciones de hitos de visualizaciones',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Notificaciones de visualizaciones enviadas',
+  })
+  async testViewNotifications(@GetCurrentUser('userId') userId: string) {
+    return this.postsService.testViewMilestoneNotifications();
+  }
+
+  // ******** ADMIN: SIMULAR VISUALIZACIONES PARA PROBAR HITOS ********
+  @Post('simulate-views/:postId')
+  @ApiOperation({ summary: 'Simular visualizaciones para probar hitos' })
+  @ApiResponse({
+    status: 200,
+    description: 'Visualizaciones simuladas',
+  })
+  async simulateViews(
+    @Param('postId') postId: string,
+    @GetCurrentUser('userId') userId: string,
+  ) {
+    return this.postsService.simulateViewsToMilestone(postId);
+  }
+
   @Post()
   @ApiOperation({ summary: 'Crear un nuevo post' })
   @ApiResponse({
@@ -92,8 +119,7 @@ export class PostsAdminController {
   }
 
   @Get('dashboard')
-  @ApiOperation
-  ({ summary: 'Obtener información completa del dashboard' })
+  @ApiOperation({ summary: 'Obtener información completa del dashboard' })
   @ApiResponse({
     status: 200,
     description: 'Datos del dashboard obtenidos',

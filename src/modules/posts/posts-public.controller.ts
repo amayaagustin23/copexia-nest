@@ -11,7 +11,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PaginationArgs } from 'src/common/pagination/pagination.interface';
 import { CommentsService } from '../comments/comments.service';
 import { CommentListResponseDto } from '../comments/dto/comment-response.dto';
-import { CreateCommentDto } from '../comments/dto/create-comment.dto';
+import { CreateCommentPublicDto } from '../comments/dto/create-comment-public.dto';
 import {
   ErrorResponseDto,
   LikeResponseDto,
@@ -122,7 +122,7 @@ export class PostsPublicController {
   })
   createComment(
     @Param('id') id: string,
-    @Body() createCommentDto: CreateCommentDto,
+    @Body() createCommentDto: CreateCommentPublicDto,
   ) {
     // Crear un nuevo objeto con el postId incluido
     const commentData = {

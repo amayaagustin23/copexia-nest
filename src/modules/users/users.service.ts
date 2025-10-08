@@ -25,10 +25,6 @@ export class UsersService {
   async getRaw<T extends Prisma.UserFindUniqueArgs>(
     input: Prisma.SelectSubset<T, Prisma.UserFindUniqueArgs>,
   ) {
-    input.where = {
-      ...input.where,
-      isDeleted: false,
-    };
     return this.user.findUnique<T>(input);
   }
 

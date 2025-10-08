@@ -2,13 +2,17 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { CommentStatus } from '@prisma/client';
 import { paginatePrisma } from '../../common/pagination';
 import { PaginationArgs } from '../../common/pagination/pagination.interface';
+import { EmailService } from '../../services/email/email.service';
 import { PrismaService } from '../../services/prisma/prisma.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 
 @Injectable()
 export class CommentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly emailService: EmailService,
+  ) {}
 
   async create(createCommentDto: CreateCommentDto) {
     const post = await this.prisma.post.findUnique({
@@ -75,6 +79,19 @@ export class CommentsService {
         },
       },
     });
+
+    // Enviar notificación por email al admin
+    try {
+      await this.emailService.sendCommentNotification(
+        comment.post.title,
+        comment.post.slug,
+        comment.authorName,
+        comment.content,
+      );
+    } catch (error) {
+      // Log del error pero no fallar la creación del comentario
+      console.error('Error sending email notification:', error);
+    }
 
     return comment;
   }

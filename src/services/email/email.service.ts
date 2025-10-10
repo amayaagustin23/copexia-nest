@@ -14,10 +14,10 @@ export class EmailService {
     commentContent: string,
     adminEmail: string = 'amayaagustin.2395@gmail.com',
   ) {
-
     try {
       const mailjetApiKey = this.configService.get<string>('MAILJET_API_KEY');
-      const mailjetSecretKey = this.configService.get<string>('MAILJET_SECRET_KEY');
+      const mailjetSecretKey =
+        this.configService.get<string>('MAILJET_SECRET_KEY');
       const senderEmail = this.configService.get<string>('EMAIL_SENDER');
 
       if (!mailjetApiKey || !mailjetSecretKey || !senderEmail) {
@@ -26,7 +26,10 @@ export class EmailService {
       }
 
       // Importar Mailjet dinámicamente
-      const mailjet = require('node-mailjet').apiConnect(mailjetApiKey, mailjetSecretKey);
+      const mailjet = require('node-mailjet').apiConnect(
+        mailjetApiKey,
+        mailjetSecretKey,
+      );
 
       const emailData = {
         Messages: [
@@ -53,8 +56,10 @@ export class EmailService {
         ],
       };
 
-      const result = await mailjet.post('send', { version: 'v3.1' }).request(emailData);
-      
+      const result = await mailjet
+        .post('send', { version: 'v3.1' })
+        .request(emailData);
+
       this.logger.log(`Email notification sent successfully to ${adminEmail}`);
       return true;
     } catch (error) {
@@ -63,12 +68,328 @@ export class EmailService {
     }
   }
 
+  private generateFullBodyTemplate(
+    title: string,
+    icon: string,
+    content: string,
+    actions?: string,
+    lang: string = 'es',
+  ): string {
+    return `
+      <!DOCTYPE html>
+      <html lang="${lang}">
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${title} - Copexia</title>
+        <style>
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #e3e8f0;
+            background: linear-gradient(135deg, #0f1c2e 0%, #1a2436 25%, #182335 50%, #1a2436 75%, #0f1c2e 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+          }
+          
+          .email-container {
+            width: 100%;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f1c2e 0%, #1a2436 25%, #182335 50%, #1a2436 75%, #0f1c2e 100%);
+            position: relative;
+            overflow: hidden;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            box-shadow: 0 10px 30px rgba(15, 28, 46, 0.3);
+            overflow: hidden;
+          }
+          
+          .email-container::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+              radial-gradient(circle at 20% 20%, rgba(223, 205, 129, 0.15) 0%, transparent 50%),
+              radial-gradient(circle at 80% 80%, rgba(183, 150, 83, 0.12) 0%, transparent 50%),
+              radial-gradient(circle at 40% 60%, rgba(223, 205, 129, 0.08) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+          }
+          
+          @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(120deg); }
+            66% { transform: translate(-20px, 20px) rotate(240deg); }
+          }
+          
+          .content-wrapper {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+          }
+          
+          .header {
+            background: linear-gradient(135deg, #dfcd81 0%, #b79653 45%, #ac7400 100%);
+            padding: 40px 30px;
+            text-align: center;
+            border-radius: 0;
+            position: relative;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            width: 100%;
+          }
+          
+          .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
+            border-radius: 0;
+            pointer-events: none;
+          }
+          
+          .header h1 {
+            color: #0a0a0a;
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          }
+          
+          .header .icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+            display: block;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+          }
+          
+          .content {
+            background: rgba(24, 35, 53, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 40px 30px;
+            border-radius: 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+          }
+          
+          .content p {
+            margin-bottom: 25px;
+            color: #d7deea;
+            font-size: 16px;
+          }
+          
+          .highlight-box {
+            background: rgba(26, 36, 54, 0.8);
+            border: 1px solid rgba(223, 205, 129, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            border-left: 5px solid #dfcd81;
+            position: relative;
+            backdrop-filter: blur(5px);
+          }
+          
+          .highlight-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(223, 205, 129, 0.05), rgba(183, 150, 83, 0.05));
+            border-radius: 15px;
+            pointer-events: none;
+          }
+          
+          .highlight-content {
+            color: #e3e8f0;
+            font-size: 15px;
+            line-height: 1.7;
+            position: relative;
+            z-index: 1;
+          }
+          
+          .highlight-content h3 {
+            color: #dfcd81;
+            margin-bottom: 15px;
+            font-size: 18px;
+          }
+          
+          .highlight-content strong {
+            color: #dfcd81;
+          }
+          
+          .actions {
+            margin-top: 35px;
+            text-align: center;
+          }
+          
+          .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #dfcd81 0%, #b79653 45%, #ac7400 100%);
+            color: #ffffff !important;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 0 10px 10px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(223, 205, 129, 0.4);
+            position: relative;
+            overflow: hidden;
+          }
+          
+          .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+          }
+          
+          .btn:hover::before {
+            left: 100%;
+          }
+          
+          .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(223, 205, 129, 0.5);
+            color: #ffffff !important;
+          }
+          
+          .btn-secondary {
+            background: rgba(26, 36, 54, 0.8);
+            color: #dfcd81;
+            border: 2px solid #dfcd81;
+            box-shadow: 0 6px 20px rgba(26, 36, 54, 0.4);
+          }
+          
+          .btn-secondary:hover {
+            background: #dfcd81;
+            color: #0a0a0a;
+            box-shadow: 0 8px 25px rgba(223, 205, 129, 0.5);
+          }
+          
+          .footer {
+            background: rgba(26, 36, 54, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+            color: #b79653;
+            margin-top: 0;
+            border-radius: 0;
+            width: 100%;
+          }
+          
+          .footer p {
+            margin: 8px 0;
+            color: #b79653;
+          }
+          
+          .logo {
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #dfcd81 0%, #b79653 45%, #ac7400 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+          }
+          
+          .reply-info {
+            background: rgba(223, 205, 129, 0.15);
+            border: 2px solid rgba(223, 205, 129, 0.4);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 25px 0;
+            text-align: center;
+            backdrop-filter: blur(5px);
+          }
+          
+          .reply-info p {
+            color: #dfcd81;
+            font-size: 15px;
+            margin: 0;
+            font-weight: 500;
+          }
+          
+          @media (max-width: 600px) {
+            .content-wrapper {
+              padding: 0;
+            }
+            
+            .header, .content, .footer {
+              padding: 25px 20px;
+            }
+            
+            .header h1 {
+              font-size: 24px;
+            }
+            
+            .btn {
+              display: block;
+              margin: 15px 0;
+              text-align: center;
+              padding: 12px 25px;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="email-container">
+          <div class="content-wrapper">
+            <div class="header">
+              <h1>${title}</h1>
+            </div>
+            
+            <div class="content">
+              ${content}
+              ${actions ? `<div class="actions">${actions}</div>` : ''}
+            </div>
+            
+            <div class="footer">
+              <div class="logo">Copexia</div>
+              <p>Este es un email automático del sistema.</p>
+              <p>Si no deseas recibir estas notificaciones, contacta al administrador.</p>
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
   private generateBaseTemplate(
     title: string,
     icon: string,
     content: string,
     actions?: string,
-    lang: string = 'es'
+    lang: string = 'es',
   ): string {
     return `
       <!DOCTYPE html>
@@ -311,39 +632,47 @@ export class EmailService {
     commentContent: string,
   ): string {
     const baseUrl = this.configService.get<string>('BACKOFFICE_BASE_URL');
-    
+
     const content = `
       <p>Se ha recibido un nuevo comentario en tu plataforma Copexia:</p>
       
       <div class="highlight-box">
         <div class="highlight-content">
-          <strong style="color: #dfcd81;">📝 ${postTitle}</strong><br><br>
-          <strong style="color: #dfcd81;">👤 ${commentAuthor}</strong><br>
+          <strong>📝 ${postTitle}</strong><br><br>
+          <strong>👤 ${commentAuthor}</strong><br>
           💬 ${commentContent}
         </div>
       </div>
       
       <p>Gestiona este comentario desde el panel de administración:</p>
     `;
-    
+
     const actions = `<a href="${baseUrl}/posts/${slug}" class="btn btn-secondary">Ver Post</a>`;
-    
-    return this.generateBaseTemplate('Nuevo Comentario', '🔔', content, actions);
+
+    return this.generateFullBodyTemplate(
+      'Nuevo Comentario',
+      '🔔',
+      content,
+      actions,
+    );
   }
 
   // Métodos para templates de contraseña con estilo consistente
-  generateRecoverPasswordTemplate(redirectUrl: string, lang: string = 'es'): string {
+  generateRecoverPasswordTemplate(
+    redirectUrl: string,
+    lang: string = 'es',
+  ): string {
     const isSpanish = lang === 'es';
     const title = isSpanish ? 'Recuperar Contraseña' : 'Recover Password';
     const icon = '🔐';
-    
-    const content = isSpanish 
+
+    const content = isSpanish
       ? `
         <p>Has solicitado recuperar tu contraseña en Copexia.</p>
         
         <div class="highlight-box">
           <div class="highlight-content">
-            <strong style="color: #dfcd81;">🔑 Recuperación de Contraseña</strong><br><br>
+            <strong>🔑 Recuperación de Contraseña</strong><br><br>
             Haz clic en el botón de abajo para crear una nueva contraseña. Este enlace es válido por 24 horas.
           </div>
         </div>
@@ -355,32 +684,35 @@ export class EmailService {
         
         <div class="highlight-box">
           <div class="highlight-content">
-            <strong style="color: #dfcd81;">🔑 Password Recovery</strong><br><br>
+            <strong>🔑 Password Recovery</strong><br><br>
             Click the button below to create a new password. This link is valid for 24 hours.
           </div>
         </div>
         
         <p>If you didn't request this change, you can safely ignore this email.</p>
       `;
-    
+
     const buttonText = isSpanish ? 'Recuperar Contraseña' : 'Recover Password';
     const actions = `<a href="${redirectUrl}" class="btn">${buttonText}</a>`;
-    
-    return this.generateBaseTemplate(title, icon, content, actions, lang);
+
+    return this.generateFullBodyTemplate(title, icon, content, actions, lang);
   }
 
-  generateNewPasswordTemplate(redirectUrl: string, lang: string = 'es'): string {
+  generateNewPasswordTemplate(
+    redirectUrl: string,
+    lang: string = 'es',
+  ): string {
     const isSpanish = lang === 'es';
     const title = isSpanish ? 'Crear Nueva Contraseña' : 'Create New Password';
     const icon = '🆕';
-    
-    const content = isSpanish 
+
+    const content = isSpanish
       ? `
         <p>Necesitas crear una nueva contraseña para continuar usando tu cuenta en Copexia.</p>
         
         <div class="highlight-box">
           <div class="highlight-content">
-            <strong style="color: #dfcd81;">🆕 Nueva Contraseña Requerida</strong><br><br>
+            <strong>🆕 Nueva Contraseña Requerida</strong><br><br>
             Haz clic en el botón de abajo para configurar tu nueva contraseña. Este enlace es válido por 24 horas.
           </div>
         </div>
@@ -392,32 +724,34 @@ export class EmailService {
         
         <div class="highlight-box">
           <div class="highlight-content">
-            <strong style="color: #dfcd81;">🆕 New Password Required</strong><br><br>
+            <strong>🆕 New Password Required</strong><br><br>
             Click the button below to set up your new password. This link is valid for 24 hours.
           </div>
         </div>
         
         <p>If you didn't request this change, contact the administrator immediately.</p>
       `;
-    
-    const buttonText = isSpanish ? 'Crear Nueva Contraseña' : 'Create New Password';
+
+    const buttonText = isSpanish
+      ? 'Crear Nueva Contraseña'
+      : 'Create New Password';
     const actions = `<a href="${redirectUrl}" class="btn">${buttonText}</a>`;
-    
-    return this.generateBaseTemplate(title, icon, content, actions, lang);
+
+    return this.generateFullBodyTemplate(title, icon, content, actions, lang);
   }
 
   generatePasswordChangedTemplate(lang: string = 'es'): string {
     const isSpanish = lang === 'es';
     const title = isSpanish ? 'Contraseña Cambiada' : 'Password Changed';
     const icon = '✅';
-    
-    const content = isSpanish 
+
+    const content = isSpanish
       ? `
         <p>Tu contraseña ha sido cambiada exitosamente en Copexia.</p>
         
         <div class="highlight-box">
           <div class="highlight-content">
-            <strong style="color: #dfcd81;">✅ Cambio Exitoso</strong><br><br>
+            <strong>✅ Cambio Exitoso</strong><br><br>
             Tu contraseña ha sido actualizada correctamente. Ya puedes usar tu nueva contraseña para acceder a tu cuenta.
           </div>
         </div>
@@ -429,26 +763,27 @@ export class EmailService {
         
         <div class="highlight-box">
           <div class="highlight-content">
-            <strong style="color: #dfcd81;">✅ Change Successful</strong><br><br>
+            <strong>✅ Change Successful</strong><br><br>
             Your password has been updated correctly. You can now use your new password to access your account.
           </div>
         </div>
         
         <p>If you didn't make this change, contact the administrator immediately.</p>
       `;
-    
-    return this.generateBaseTemplate(title, icon, content, undefined, lang);
+
+    return this.generateFullBodyTemplate(title, icon, content, undefined, lang);
   }
 
   // Métodos para enviar emails de contraseña directamente
   async sendRecoverPasswordEmail(
     toEmail: string,
     redirectUrl: string,
-    lang: string = 'es'
+    lang: string = 'es',
   ) {
     try {
       const mailjetApiKey = this.configService.get<string>('MAILJET_API_KEY');
-      const mailjetSecretKey = this.configService.get<string>('MAILJET_SECRET_KEY');
+      const mailjetSecretKey =
+        this.configService.get<string>('MAILJET_SECRET_KEY');
       const senderEmail = this.configService.get<string>('EMAIL_SENDER');
 
       if (!mailjetApiKey || !mailjetSecretKey || !senderEmail) {
@@ -456,9 +791,14 @@ export class EmailService {
         return false;
       }
 
-      const mailjet = require('node-mailjet').apiConnect(mailjetApiKey, mailjetSecretKey);
+      const mailjet = require('node-mailjet').apiConnect(
+        mailjetApiKey,
+        mailjetSecretKey,
+      );
       const isSpanish = lang === 'es';
-      const subject = isSpanish ? 'Recuperar Contraseña - Copexia' : 'Recover Password - Copexia';
+      const subject = isSpanish
+        ? 'Recuperar Contraseña - Copexia'
+        : 'Recover Password - Copexia';
 
       const emailData = {
         Messages: [
@@ -475,14 +815,16 @@ export class EmailService {
             ],
             Subject: subject,
             HTMLPart: this.generateRecoverPasswordTemplate(redirectUrl, lang),
-            TextPart: isSpanish 
+            TextPart: isSpanish
               ? `Recupera tu contraseña en Copexia: ${redirectUrl}`
               : `Recover your password on Copexia: ${redirectUrl}`,
           },
         ],
       };
 
-      const result = await mailjet.post('send', { version: 'v3.1' }).request(emailData);
+      const result = await mailjet
+        .post('send', { version: 'v3.1' })
+        .request(emailData);
       this.logger.log(`Recover password email sent successfully to ${toEmail}`);
       return true;
     } catch (error) {
@@ -494,11 +836,12 @@ export class EmailService {
   async sendNewPasswordEmail(
     toEmail: string,
     redirectUrl: string,
-    lang: string = 'es'
+    lang: string = 'es',
   ) {
     try {
       const mailjetApiKey = this.configService.get<string>('MAILJET_API_KEY');
-      const mailjetSecretKey = this.configService.get<string>('MAILJET_SECRET_KEY');
+      const mailjetSecretKey =
+        this.configService.get<string>('MAILJET_SECRET_KEY');
       const senderEmail = this.configService.get<string>('EMAIL_SENDER');
 
       if (!mailjetApiKey || !mailjetSecretKey || !senderEmail) {
@@ -506,9 +849,14 @@ export class EmailService {
         return false;
       }
 
-      const mailjet = require('node-mailjet').apiConnect(mailjetApiKey, mailjetSecretKey);
+      const mailjet = require('node-mailjet').apiConnect(
+        mailjetApiKey,
+        mailjetSecretKey,
+      );
       const isSpanish = lang === 'es';
-      const subject = isSpanish ? 'Crear Nueva Contraseña - Copexia' : 'Create New Password - Copexia';
+      const subject = isSpanish
+        ? 'Crear Nueva Contraseña - Copexia'
+        : 'Create New Password - Copexia';
 
       const emailData = {
         Messages: [
@@ -525,14 +873,16 @@ export class EmailService {
             ],
             Subject: subject,
             HTMLPart: this.generateNewPasswordTemplate(redirectUrl, lang),
-            TextPart: isSpanish 
+            TextPart: isSpanish
               ? `Crea una nueva contraseña en Copexia: ${redirectUrl}`
               : `Create a new password on Copexia: ${redirectUrl}`,
           },
         ],
       };
 
-      const result = await mailjet.post('send', { version: 'v3.1' }).request(emailData);
+      const result = await mailjet
+        .post('send', { version: 'v3.1' })
+        .request(emailData);
       this.logger.log(`New password email sent successfully to ${toEmail}`);
       return true;
     } catch (error) {
@@ -541,13 +891,11 @@ export class EmailService {
     }
   }
 
-  async sendPasswordChangedEmail(
-    toEmail: string,
-    lang: string = 'es'
-  ) {
+  async sendPasswordChangedEmail(toEmail: string, lang: string = 'es') {
     try {
       const mailjetApiKey = this.configService.get<string>('MAILJET_API_KEY');
-      const mailjetSecretKey = this.configService.get<string>('MAILJET_SECRET_KEY');
+      const mailjetSecretKey =
+        this.configService.get<string>('MAILJET_SECRET_KEY');
       const senderEmail = this.configService.get<string>('EMAIL_SENDER');
 
       if (!mailjetApiKey || !mailjetSecretKey || !senderEmail) {
@@ -555,9 +903,14 @@ export class EmailService {
         return false;
       }
 
-      const mailjet = require('node-mailjet').apiConnect(mailjetApiKey, mailjetSecretKey);
+      const mailjet = require('node-mailjet').apiConnect(
+        mailjetApiKey,
+        mailjetSecretKey,
+      );
       const isSpanish = lang === 'es';
-      const subject = isSpanish ? 'Contraseña Cambiada - Copexia' : 'Password Changed - Copexia';
+      const subject = isSpanish
+        ? 'Contraseña Cambiada - Copexia'
+        : 'Password Changed - Copexia';
 
       const emailData = {
         Messages: [
@@ -574,14 +927,16 @@ export class EmailService {
             ],
             Subject: subject,
             HTMLPart: this.generatePasswordChangedTemplate(lang),
-            TextPart: isSpanish 
+            TextPart: isSpanish
               ? 'Tu contraseña ha sido cambiada exitosamente en Copexia.'
               : 'Your password has been successfully changed on Copexia.',
           },
         ],
       };
 
-      const result = await mailjet.post('send', { version: 'v3.1' }).request(emailData);
+      const result = await mailjet
+        .post('send', { version: 'v3.1' })
+        .request(emailData);
       this.logger.log(`Password changed email sent successfully to ${toEmail}`);
       return true;
     } catch (error) {
@@ -599,7 +954,8 @@ export class EmailService {
   ) {
     try {
       const mailjetApiKey = this.configService.get<string>('MAILJET_API_KEY');
-      const mailjetSecretKey = this.configService.get<string>('MAILJET_SECRET_KEY');
+      const mailjetSecretKey =
+        this.configService.get<string>('MAILJET_SECRET_KEY');
       const senderEmail = this.configService.get<string>('EMAIL_SENDER');
 
       if (!mailjetApiKey || !mailjetSecretKey || !senderEmail) {
@@ -608,7 +964,10 @@ export class EmailService {
       }
 
       // Importar Mailjet dinámicamente
-      const mailjet = require('node-mailjet').apiConnect(mailjetApiKey, mailjetSecretKey);
+      const mailjet = require('node-mailjet').apiConnect(
+        mailjetApiKey,
+        mailjetSecretKey,
+      );
 
       const emailData = {
         Messages: [
@@ -634,9 +993,13 @@ export class EmailService {
         ],
       };
 
-      const result = await mailjet.post('send', { version: 'v3.1' }).request(emailData);
-      
-      this.logger.log(`View milestone notification sent successfully to ${adminEmail} for ${viewCount} views`);
+      const result = await mailjet
+        .post('send', { version: 'v3.1' })
+        .request(emailData);
+
+      this.logger.log(
+        `View milestone notification sent successfully to ${adminEmail} for ${viewCount} views`,
+      );
       return true;
     } catch (error) {
       this.logger.error('Failed to send view milestone notification:', error);
@@ -650,12 +1013,12 @@ export class EmailService {
     viewCount: number,
   ): string {
     const baseUrl = this.configService.get<string>('BACKOFFICE_BASE_URL');
-    
+
     // Determinar el tipo de hito y el emoji
     let milestoneType = '';
     let emoji = '';
     let message = '';
-    
+
     if (viewCount >= 1000) {
       milestoneType = 'GRAN HITO';
       emoji = '🏆';
@@ -665,24 +1028,161 @@ export class EmailService {
       emoji = '🎯';
       message = `¡Excelente! Este post ha alcanzado ${viewCount} visualizaciones. Está generando mucho interés.`;
     }
-    
+
     const content = `
       <p>¡Felicitaciones! Uno de tus posts ha alcanzado un hito importante:</p>
       
       <div class="highlight-box">
         <div class="highlight-content">
-          <strong style="color: #dfcd81;">${emoji} ${milestoneType}</strong><br><br>
-          <strong style="color: #dfcd81;">📝 ${postTitle}</strong><br>
-          <strong style="color: #dfcd81;">👀 ${viewCount} visualizaciones</strong><br><br>
+          <strong>${emoji} ${milestoneType}</strong><br><br>
+          <strong>📝 ${postTitle}</strong><br>
+          <strong>👀 ${viewCount} visualizaciones</strong><br><br>
           ${message}
         </div>
       </div>
       
       <p>Este es un gran momento para celebrar el éxito de tu contenido. ¡Sigue creando contenido de calidad!</p>
     `;
-    
+
     const actions = `<a href="${baseUrl}/posts/${slug}" class="btn btn-secondary">Ver Post</a>`;
-    
-    return this.generateBaseTemplate('Hito de Visualizaciones', '🎉', content, actions);
+
+    return this.generateFullBodyTemplate(
+      'Hito de Visualizaciones',
+      '🎉',
+      content,
+      actions,
+    );
+  }
+
+  generateContactMessageTemplate(
+    fullName: string,
+    email: string,
+    subject: string,
+    message: string,
+  ): string {
+    const content = `
+      <p>Has recibido un nuevo mensaje desde el formulario de contacto de tu sitio web:</p>
+      
+      <div class="highlight-box">
+        <div class="highlight-content">
+          <h3>📋 Información del Contacto</h3>
+          <p><strong>👤 Nombre:</strong> ${fullName}</p>
+          <p><strong>📧 Email:</strong> ${email}</p>
+          <p><strong>📝 Asunto:</strong> ${subject}</p>
+        </div>
+      </div>
+      
+      <div class="highlight-box">
+        <div class="highlight-content">
+          <h3>💬 Mensaje</h3>
+          <p style="white-space: pre-wrap;">${message}</p>
+        </div>
+      </div>
+      
+      <div class="reply-info">
+        <p>💡 Puedes responder directamente a este email para contactar al cliente.</p>
+      </div>
+    `;
+
+    return this.generateFullBodyTemplate(
+      'Nuevo Mensaje de Contacto',
+      '📧',
+      content,
+    );
+  }
+
+  async sendContactMessage(
+    fullName: string,
+    email: string,
+    subject: string,
+    message: string,
+    adminEmail: string = 'contacto@copexia.com',
+  ): Promise<boolean> {
+    try {
+      const mailjetApiKey = this.configService.get<string>('MAILJET_API_KEY');
+      const mailjetSecretKey =
+        this.configService.get<string>('MAILJET_SECRET_KEY');
+      const senderEmail = this.configService.get<string>('EMAIL_SENDER');
+
+      if (!mailjetApiKey || !mailjetSecretKey || !senderEmail) {
+        this.logger.error('Mailjet credentials not configured');
+        return false;
+      }
+
+      // Importar Mailjet dinámicamente
+      const mailjet = require('node-mailjet').apiConnect(
+        mailjetApiKey,
+        mailjetSecretKey,
+      );
+
+      const emailData = {
+        Messages: [
+          {
+            From: {
+              Email: senderEmail,
+              Name: 'Copexia - Formulario de Contacto',
+            },
+            To: [
+              {
+                Email: adminEmail,
+                Name: 'Equipo Copexia',
+              },
+            ],
+            ReplyTo: {
+              Email: email,
+              Name: fullName,
+            },
+            Subject: `[Formulario de Contacto] ${subject}`,
+            HTMLPart: this.generateContactMessageTemplate(
+              fullName,
+              email,
+              subject,
+              message,
+            ),
+            TextPart: this.generateContactMessageText(
+              fullName,
+              email,
+              subject,
+              message,
+            ),
+          },
+        ],
+      };
+
+      const result = await mailjet
+        .post('send', { version: 'v3.1' })
+        .request(emailData);
+
+      this.logger.log(`Contact message sent successfully from ${email}`);
+      return true;
+    } catch (error) {
+      this.logger.error('Failed to send contact message:', error);
+      return false;
+    }
+  }
+
+  private generateContactMessageText(
+    fullName: string,
+    email: string,
+    subject: string,
+    message: string,
+  ): string {
+    return `
+Nuevo mensaje de contacto desde el sitio web de Copexia
+
+INFORMACIÓN DEL CONTACTO:
+👤 Nombre: ${fullName}
+📧 Email: ${email}
+📝 Asunto: ${subject}
+
+MENSAJE:
+${message}
+
+---
+Fecha: ${new Date().toLocaleString('es-ES')}
+Enviado desde el formulario de contacto de Copexia
+
+Puedes responder directamente a este email para contactar al cliente.
+    `.trim();
   }
 }

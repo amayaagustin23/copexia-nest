@@ -24,7 +24,7 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: development
-      PORT: 3000
+      PORT: 9000
       DATABASE_URL: postgresql://copexia_user:copexia_password@postgres:5432/copexia_db_dev
       JWT_SECRET_KEY: dev-jwt-secret-key-very-long-and-secure-for-development
       JWT_REFRESH_SECRET_KEY: dev-refresh-secret-key-very-long-and-secure-for-development
@@ -40,7 +40,7 @@ services:
       BACKOFFICE_RESET_PASSWORD_URL: http://localhost:3001/es/reset-password
       BACKOFFICE_BASE_URL: http://localhost:3001/es
       FRONTEND_URL: http://localhost:3001
-      API_URL: http://localhost:3000/api/v1
+      API_URL: http://localhost:9000/api/v1
       # AWS Configuration (para desarrollo local, usar valores de prueba)
       AWS_ACCESS_KEY_ID: your-aws-access-key
       AWS_SECRET_ACCESS_KEY: your-aws-secret-key
@@ -50,7 +50,7 @@ services:
       I18N_LANGUAGE: en
       I18N_FALLBACK_LANGUAGE: es
     ports:
-      - "3000:3000"
+      - "9000:9000"
     depends_on:
       - postgres
     networks:
@@ -61,29 +61,8 @@ services:
       - ./uploads:/app/uploads
     command: yarn start:dev
 
-  # pgAdmin para gestión de base de datos
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: copexia-pgadmin-dev
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@copexia.com
-      PGADMIN_DEFAULT_PASSWORD: admin123
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
-    ports:
-      - "5050:80"
-    depends_on:
-      - postgres
-    networks:
-      - copexia-dev-network
-    volumes:
-      - pgadmin_dev_data:/var/lib/pgadmin
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-
 volumes:
   postgres_dev_data:
-  pgadmin_dev_data:
 
 networks:
   copexia-dev-network:

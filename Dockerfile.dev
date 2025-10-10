@@ -34,7 +34,7 @@ COPY . .
 RUN npx prisma generate
 
 # Exponer puerto
-EXPOSE 3000
+EXPOSE 9000
 
 # Comando por defecto para desarrollo
 CMD ["yarn", "start:dev"]

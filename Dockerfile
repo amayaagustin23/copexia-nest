@@ -32,14 +32,14 @@ RUN yarn install --frozen-lockfile
 # Copiar código fuente
 COPY . .
 
-# Generar Prisma client con el binary target correcto
-RUN npx prisma generate --binary-target=linux-musl-openssl-3.0.x
+# Generar Prisma client
+RUN npx prisma generate
 
 # Build de la aplicación
 RUN yarn build
 
 # Exponer puerto
-EXPOSE 3000
+EXPOSE 4000
 
 # Comando por defecto
 CMD ["node", "dist/main"]

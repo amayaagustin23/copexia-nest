@@ -1,6 +1,6 @@
 // schema.prisma
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -28,52 +28,54 @@ enum CommentStatus {
 }
 
 model User {
-  id         String   @id @default(uuid())
-  email      String   @unique
-  password   String
-  name       String
-  role       Role     @default(ADMIN)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  posts      Post[]
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(ADMIN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  posts     Post[]
+
   @@map("users")
 }
 
 model Category {
-  id          String   @id @default(uuid())
-  name        String   @unique
-  slug        String   @unique
+  id          String         @id @default(uuid())
+  name        String         @unique
+  slug        String         @unique
   description String?
-  color       String?  @default("#6366f1")
+  color       String?        @default("#6366f1")
   icon        String?
-  isActive    Boolean  @default(true)
-  sortOrder   Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  isActive    Boolean        @default(true)
+  sortOrder   Int            @default(0)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
   posts       PostCategory[]
+
   @@map("categories")
 }
 
 model Post {
-  id          String      @id @default(uuid())
-  title       String
-  slug        String      @unique
-  content     String      // Contenido del post en formato HTML
-  excerpt     String?     // Resumen del post en texto plano
+  id            String     @id @default(uuid())
+  title         String
+  slug          String     @unique
+  content       String // Contenido del post en formato HTML
+  excerpt       String? // Resumen del post en texto plano
   featuredImage String?
-  status      PostStatus  @default(DRAFT)
-  isPinned    Boolean     @default(false)
-  viewCount   Int         @default(0)
-  likeCount   Int         @default(0)  // Solo contador, sin tracking individual
-  publishedAt DateTime?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  status        PostStatus @default(DRAFT)
+  isPinned      Boolean    @default(false)
+  viewCount     Int        @default(0)
+  likeCount     Int        @default(0) // Solo contador, sin tracking individual
+  publishedAt   DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 
   // Relaciones
-  authorId    String
-  author      User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  categories  PostCategory[]
-  comments    Comment[]
+  authorId   String
+  author     User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  categories PostCategory[]
+  comments   Comment[]
 
   @@map("posts")
 }
@@ -85,33 +87,132 @@ model PostCategory {
   createdAt  DateTime @default(now())
 
   // Relaciones
-  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  post     Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@unique([postId, categoryId])
   @@map("post_categories")
 }
 
-
 model Comment {
-  id        String        @id @default(uuid())
-  content   String        // Contenido del comentario en formato HTML
-  authorName String       // Nombre del comentarista
-  authorEmail String?     // Email del comentarista (opcional)
-  authorWebsite String?   // Website del comentarista (opcional)
-  status    CommentStatus @default(PENDING)
-  parentId  String?
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  id            String        @id @default(uuid())
+  content       String // Contenido del comentario en formato HTML
+  authorName    String // Nombre del comentarista
+  authorEmail   String? // Email del comentarista (opcional)
+  authorWebsite String? // Website del comentarista (opcional)
+  status        CommentStatus @default(PENDING)
+  parentId      String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
   // Relaciones
-  postId    String
-  post      Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
-  parent    Comment?      @relation("CommentReplies", fields: [parentId], references: [id])
-  replies   Comment[]     @relation("CommentReplies")
+  postId  String
+  post    Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parent  Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies Comment[] @relation("CommentReplies")
 
   @@map("comments")
 }
 
+// Analytics Models
+model PageVisit {
+  id               String   @id @default(uuid())
+  sessionId        String   @unique // SessionId único por visita
+  page             String
+  referrer         String?
+  userAgent        String
+  deviceType       String
+  browser          String
+  os               String
+  language         String
+  screenResolution String
+  viewportSize     String
+  timestamp        DateTime @default(now())
+  createdAt        DateTime @default(now())
 
+  // Relaciones
+  session PageSession?
+  events  AnalyticsEvent[]
 
+  // Índices optimizados para analytics
+  @@index([sessionId]) // Búsquedas por sesión
+  @@index([timestamp]) // Filtros por fecha
+  @@index([page]) // Filtros por página
+  @@index([deviceType]) // Agregaciones por device
+  @@index([browser]) // Agregaciones por browser
+  @@index([os]) // Agregaciones por OS
+  @@index([language]) // Agregaciones por idioma
+  @@index([timestamp, page]) // Consultas combinadas fecha + página
+  @@map("page_visits")
+}
+
+model PageSession {
+  id             String    @id @default(uuid())
+  sessionId      String    @unique
+  page           String
+  entryTime      DateTime
+  exitTime       DateTime?
+  duration       Int? // Duración en segundos
+  scrollDepth    Int? // Porcentaje de scroll (0-100)
+  sectionsViewed String[] // Array de secciones vistas
+  interactions   Json? // Array de interacciones detalladas
+  engagement     String? // low, medium, high
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Relaciones
+  visit PageVisit @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
+
+  // Índices optimizados para sesiones
+  @@index([sessionId]) // Búsquedas por sesión
+  @@index([entryTime]) // Filtros por fecha de entrada
+  @@index([engagement]) // Filtros por engagement
+  @@index([page]) // Filtros por página
+  @@index([duration]) // Filtros por duración
+  @@index([scrollDepth]) // Filtros por scroll depth
+  @@index([entryTime, page]) // Consultas combinadas fecha + página
+  @@map("page_sessions")
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(uuid())
+  sessionId String
+  eventType String // Tipo de evento (click, download, form_submit, etc.)
+  eventData Json? // Datos específicos del evento
+  page      String // Página donde ocurrió el evento
+  timestamp DateTime
+  createdAt DateTime @default(now())
+
+  // Relaciones
+  visit PageVisit @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
+
+  // Índices optimizados para eventos
+  @@index([sessionId]) // Búsquedas por sesión
+  @@index([eventType]) // Filtros por tipo de evento
+  @@index([timestamp]) // Filtros por fecha
+  @@index([page]) // Filtros por página
+  @@index([eventType, page]) // Consultas combinadas tipo + página
+  @@index([timestamp, eventType]) // Consultas combinadas fecha + tipo
+  @@map("analytics_events")
+}
+
+// Modelo para agregaciones diarias (opcional, mejora rendimiento)
+model AnalyticsDailySummary {
+  id                  String   @id @default(uuid())
+  date                DateTime @unique // Fecha del resumen (solo fecha, sin hora)
+  totalVisits         Int      @default(0)
+  uniqueVisitors      Int      @default(0)
+  averageDuration     Float? // Duración promedio en segundos
+  averageScrollDepth  Float? // Scroll depth promedio (0-100)
+  deviceBreakdown     Json? // {desktop: 100, mobile: 50, tablet: 10}
+  browserBreakdown    Json? // {Chrome: 120, Safari: 30}
+  osBreakdown         Json? // {Windows: 100, macOS: 30}
+  engagementBreakdown Json? // {high: 50, medium: 80, low: 20}
+  topSections         Json? // [{section: "hero", views: 150}]
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  // Índices para consultas rápidas
+  @@index([date]) // Filtros por fecha
+  @@map("analytics_daily_summary")
+}

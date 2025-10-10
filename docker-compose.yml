@@ -25,7 +25,7 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
-      PORT: 3000
+      PORT: 9000
       DATABASE_URL: postgresql://copexia_user:copexia_password@postgres:5432/copexia_db
       JWT_SECRET: your-super-secret-jwt-key-change-in-production
       JWT_REFRESH_SECRET: your-super-secret-refresh-key-change-in-production
@@ -33,10 +33,10 @@ services:
       EMAIL_SENDER: atomix18@gmail.com
       MAILJET_API_KEY: 7586a4f262572d5b593499f681168398
       MAILJET_SECRET_KEY: 395702c3b9e04bf03903429b214d9d60
-      BACKOFFICE_RESET_PASSWORD_URL: http://localhost:3000/es/reset-password
-      BACKOFFICE_BASE_URL: http://localhost:3000
+      BACKOFFICE_RESET_PASSWORD_URL: http://localhost:9000/es/reset-password
+      BACKOFFICE_BASE_URL: http://localhost:9000
     ports:
-      - "3000:3000"
+      - "9000:9000"
     depends_on:
       - postgres
     networks:

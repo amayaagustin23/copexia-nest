@@ -22,9 +22,6 @@ export const envValidationSchema = Joi.object({
   BACKOFFICE_RESET_PASSWORD_URL: Joi.string().required(),
   MAILJET_API_KEY: Joi.string().required(),
   MAILJET_SECRET_KEY: Joi.string().required(),
-  AWS_ACCESS_KEY_ID: Joi.string().required(),
-  AWS_SECRET_ACCESS_KEY: Joi.string().required(),
-  AWS_REGION: Joi.string().required(),
-  S3_BUCKET: Joi.string().required(),
+  APP_URL: Joi.string().required(),
 
 });

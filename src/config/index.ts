@@ -33,13 +33,4 @@ export const messagingConfig = {
   },
 } as const;
 
-export const awsConfig = {
-  client: {
-    accessKeyId: env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
-    region: env.AWS_REGION,
-  },
-  s3: {
-    bucket: env.S3_BUCKET,
-  },
-} as const;
+

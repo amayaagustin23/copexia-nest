@@ -9,7 +9,7 @@ Backend API para el sistema de gestión de contenido desarrollado con NestJS, Pr
 - **Autenticación**: JWT con refresh tokens
 - **Internacionalización**: Soporte para ES/EN
 - **Email**: Integración con Mailjet
-- **AWS**: Servicios S3 para archivos
+- **Storage**: Sistema de archivos local
 - **Documentación**: API documentada con Swagger
 
 ## 📋 Requisitos
@@ -149,11 +149,8 @@ EMAIL_SENDER=noreply@example.com
 MAILJET_API_KEY=your-mailjet-api-key
 MAILJET_SECRET_KEY=your-mailjet-secret-key
 
-# AWS
-AWS_ACCESS_KEY_ID=your-aws-access-key
-AWS_SECRET_ACCESS_KEY=your-aws-secret-key
-AWS_REGION=us-east-1
-S3_BUCKET=your-s3-bucket
+# APP
+APP_URL=http://localhost:3000
 
 # URLs
 FRONTEND_URL=http://localhost:3001

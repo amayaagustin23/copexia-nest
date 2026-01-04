@@ -8,7 +8,7 @@ import { UpdateSessionDto } from './dto/update-session.dto';
 
 @Injectable()
 export class AnalyticsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
 
   /**
@@ -114,7 +114,67 @@ export class AnalyticsService {
     });
 
     if (!visit) {
-      throw new NotFoundException('Session not found');
+      // Si no existe la visita, crear una visita básica primero
+      const newVisit = await this.prisma.pageVisit.create({
+        data: {
+          sessionId,
+          page: updateSessionDto.sectionsViewed[0] || '/unknown',
+          userAgent: 'Unknown',
+          deviceType: 'unknown',
+          browser: 'unknown',
+          os: 'unknown',
+          language: 'unknown',
+          screenResolution: 'unknown',
+          viewportSize: 'unknown',
+        },
+      });
+
+      // Usar la nueva visita para crear la sesión
+      const session = await this.prisma.pageSession.upsert({
+        where: { sessionId },
+        create: {
+          sessionId,
+          page: newVisit.page,
+          entryTime: newVisit.timestamp,
+          exitTime: new Date(updateSessionDto.exitTime),
+          duration: updateSessionDto.duration,
+          scrollDepth: updateSessionDto.scrollDepth,
+          sectionsViewed: updateSessionDto.sectionsViewed,
+          interactions: updateSessionDto.interactions
+            ? JSON.parse(JSON.stringify(updateSessionDto.interactions))
+            : [],
+          engagement: this.calculateEngagement(
+            updateSessionDto.duration,
+            updateSessionDto.scrollDepth,
+          ),
+        },
+        update: {
+          exitTime: new Date(updateSessionDto.exitTime),
+          duration: updateSessionDto.duration,
+          scrollDepth: updateSessionDto.scrollDepth,
+          sectionsViewed: updateSessionDto.sectionsViewed,
+          interactions: updateSessionDto.interactions
+            ? JSON.parse(JSON.stringify(updateSessionDto.interactions))
+            : [],
+          engagement: this.calculateEngagement(
+            updateSessionDto.duration,
+            updateSessionDto.scrollDepth,
+          ),
+        },
+      });
+
+      return {
+        id: session.id,
+        sessionId: session.sessionId,
+        page: session.page,
+        entryTime: session.entryTime,
+        exitTime: session.exitTime,
+        duration: session.duration,
+        scrollDepth: session.scrollDepth,
+        sectionsViewed: session.sectionsViewed,
+        interactions: session.interactions,
+        engagement: session.engagement,
+      };
     }
 
     // Calcular engagement
@@ -271,10 +331,10 @@ export class AnalyticsService {
       _count: true,
     });
 
-    const deviceBreakdown: Record<string, number> = {};
-    devices.forEach((d) => {
-      deviceBreakdown[d.deviceType] = d._count;
-    });
+    const deviceBreakdown = devices.map((d) => ({
+      type: d.deviceType || 'Unknown',
+      count: d._count,
+    }));
 
     // Browser breakdown
     const browsers = await this.prisma.pageVisit.groupBy({
@@ -288,10 +348,10 @@ export class AnalyticsService {
       },
     });
 
-    const browserBreakdown: Record<string, number> = {};
-    browsers.forEach((b) => {
-      browserBreakdown[b.browser] = b._count;
-    });
+    const browserBreakdown = browsers.map((b) => ({
+      browser: b.browser || 'Unknown',
+      count: b._count,
+    }));
 
     // OS breakdown
     const osList = await this.prisma.pageVisit.groupBy({
@@ -305,10 +365,10 @@ export class AnalyticsService {
       },
     });
 
-    const osBreakdown: Record<string, number> = {};
-    osList.forEach((os) => {
-      osBreakdown[os.os] = os._count;
-    });
+    const osBreakdown = osList.map((os) => ({
+      os: os.os || 'Unknown',
+      count: os._count,
+    }));
 
     // Engagement breakdown
     const engagements = await this.prisma.pageSession.groupBy({
@@ -320,21 +380,30 @@ export class AnalyticsService {
       _count: true,
     });
 
-    const engagementBreakdown: Record<string, number> = {};
-    engagements.forEach((e) => {
-      if (e.engagement) {
-        engagementBreakdown[e.engagement] = e._count;
-      }
+    const engagementBreakdown = engagements.map((e) => ({
+      engagement: e.engagement,
+      count: e._count,
+    }));
+
+    // Calculate Bounce Rate (sessions with duration < 10s or only 1 page view - simplified here as low duration)
+    const totalSessions = await this.prisma.pageSession.count({
+      where: sessionDateFilter,
     });
+
+    const bouncedSessions = await this.prisma.pageSession.count({
+      where: {
+        ...sessionDateFilter,
+        duration: { lt: 10 }, // Assuming < 10 seconds is a bounce
+      },
+    });
+
+    const bounceRate = totalSessions > 0 ? (bouncedSessions / totalSessions) * 100 : 0;
 
     // Visits by day
     let visitsByDay: any[] = [];
     if (query.startDate && query.endDate) {
       const startDate = new Date(query.startDate);
       const endDate = new Date(query.endDate);
-      const days = Math.ceil(
-        (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
-      );
 
       // Obtener visitas por día
       const visitsRaw = await this.prisma.$queryRaw<any[]>`
@@ -349,23 +418,26 @@ export class AnalyticsService {
       `;
 
       visitsByDay = visitsRaw.map((row) => ({
-        date: row.date.toISOString().split('T')[0],
-        visits: parseInt(row.visits),
-        uniqueVisitors: parseInt(row.unique_visitors),
+        date: row.date instanceof Date ? row.date.toISOString().split('T')[0] : row.date,
+        visits: Number(row.visits),
+        uniqueVisitors: Number(row.unique_visitors),
       }));
     }
 
     return {
       totalVisits,
       uniqueVisitors,
-      averageDuration: Math.round(avgStats._avg.duration || 0),
+      totalSessions,
+      totalEvents: 0, // Placeholder if not tracking events count yet
+      avgSessionDuration: Math.round(avgStats._avg.duration || 0),
       averageScrollDepth: Math.round(avgStats._avg.scrollDepth || 0),
-      topSections,
+      bounceRate,
+      topPages: topSections.map(s => ({ page: s.section, visits: s.views })), // Rename for frontend compatibility
       deviceBreakdown,
       browserBreakdown,
       osBreakdown,
       engagementBreakdown,
-      visitsByDay,
+      dailyVisits: visitsByDay, // Rename for frontend compatibility
     };
   }
 

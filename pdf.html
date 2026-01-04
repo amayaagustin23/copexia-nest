@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presupuesto - Proyecto Copexia</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 30px;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        h1 {
+            color: #2a2a2a;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #0056b3;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 5px;
+            margin-top: 30px;
+        }
+        .header-info p, .summary-info p {
+            margin: 5px 0;
+            font-size: 1.1em;
+        }
+        .header-info span, .summary-info span {
+            font-weight: bold;
+            color: #555;
+            min-width: 150px;
+            display: inline-block;
+        }
+        .summary-box {
+            background-color: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .summary-box p {
+            margin: 8px 0;
+        }
+        .summary-box .total {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #000;
+        }
+        .summary-box .future-rate {
+            font-style: italic;
+            color: #d9534f;
+            margin-top: 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f7f7f7;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #fdfdfd;
+        }
+        .natural-lang p {
+            margin-bottom: 15px;
+        }
+        .natural-lang strong {
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Presupuesto de Desarrollo – Proyecto Copexia (Frontend + Backend)</h1>
+
+        <div class="header-info">
+            <p><span>Responsable:</span> Agustín Amaya</p>
+            <p><span>Rol:</span> Desarrollador Fullstack</p>
+            <p><span>Fecha:</span> Noviembre 2025</p>
+        </div>
+
+        <div class="summary-box">
+            <p><span>Duración estimada total:</span> 140 horas</p>
+            <p><span>Valor hora (etapa actual):</span> $3.500</p>
+            <p class="total"><span>Total (trabajo hasta la fecha):</span> $490.000</p>
+            <p><small>(El monto corresponde al desarrollo realizado hasta el momento, incluyendo tareas completadas, pruebas y ajustes finales de esta etapa. No incluye costos de hosting ni licencias de terceros.)</small></p>
+            <p class="future-rate">
+                A partir de esta instancia, el valor de la hora de desarrollo será de $2.500, aplicable a cualquier trabajo o ajuste adicional posterior al alcance aquí detallado.
+            </p>
+        </div>
+
+        <h2>💬 1. Versión en Lenguaje Natural</h2>
+        <div class="natural-lang">
+            <p>El presente documento refleja el desarrollo integral del proyecto Copexia hasta la fecha, abarcando tanto el sitio público (frontend) como el panel interno de administración (backend).</p>
+            <p>El trabajo se centró en construir una plataforma moderna, veloz y fácil de mantener, que refleje la identidad de Copexia y permita gestionar contenidos de forma sencilla.</p>
+            
+            <p><strong>Estructura y preparación:</strong> Se configuró el entorno inicial y la estructura base del proyecto, garantizando estabilidad, seguridad y un flujo de trabajo ordenado.</p>
+            <p><strong>Diseño e interfaz del sitio:</strong> Se desarrolló el sitio público con las secciones principales (Inicio, Quiénes Somos, Valores y Contacto), cuidando diseño, responsividad y usabilidad. Se incluyeron animaciones suaves y un botón de contacto vía WhatsApp.</p>
+            <p><strong>Contenidos y navegación:</strong> El sitio permite mostrar publicaciones y artículos, con listados, búsquedas y detalle de cada nota, conectados al sistema de administración interno.</p>
+            <p><strong>Autenticación y seguridad:</strong> Se implementó ingreso con usuario y contraseña, recuperación de clave y control de acceso por permisos, priorizando la seguridad de los datos.</p>
+            <p><strong>Panel administrativo:</strong> Desde un panel claro y moderno, el equipo de Copexia puede gestionar publicaciones, categorías y comentarios.</p>
+            <p><strong>Integración de servicios:</strong> El frontend se comunica con el backend a través de una API segura, garantizando la sincronización entre el panel y el sitio público.</p>
+            <p><strong>Formularios y comunicación:</strong> Los formularios cuentan con validaciones y mensajes claros, incluyendo el formulario de contacto funcional.</p>
+            <p><strong>Analítica y monitoreo:</strong> Se incorporaron métricas y logs para comprender el uso del sistema y optimizar la experiencia del usuario.</p>
+            <p><strong>Infraestructura y despliegue:</strong> Se prepararon configuraciones de Docker, scripts de build y despliegue, y configuraciones de servidor.</p>
+            <p><strong>Revisión final y ajustes:</strong> Se realizó una revisión general de diseño, textos, comportamiento y accesibilidad, incorporando los ajustes derivados del feedback del cliente.</p>
+        </div>
+
+        <h2>⚙️ 2. Versión Técnica Detallada</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Etapa</th>
+                    <th>Descripción</th>
+                    <th>Horas</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1. Arquitectura y Setup</td>
+                    <td>Configuración inicial del entorno, estructura de carpetas, Docker, PM2, ESLint, TypeScript, conexión frontend-backend.</td>
+                    <td>14 h</td>
+                </tr>
+                <tr>
+                    <td>2. Diseño de Interfaz Pública</td>
+                    <td>Secciones principales (Hero, About, Values, Contact), animaciones, responsividad y FloatingWhatsApp.</td>
+                    <td>16 h</td>
+                </tr>
+                <tr>
+                    <td>3. Contenidos y Navegación</td>
+                    <td>Listado y detalle de posts, búsqueda, paginación e integración de servicios.</td>
+                    <td>8 h</td>
+                </tr>
+                <tr>
+                    <td>4. Autenticación y Seguridad</td>
+                    <td>Formularios de login/recuperación, JWT, middleware, roles y permisos.</td>
+                    <td>12 h</td>
+                </tr>
+                <tr>
+                    <td>5. Panel Administrativo</td>
+                    <td>CRUD de posts, categorías y comentarios; layout con Sidebar y navegación.</td>
+                    <td>18 h</td>
+                </tr>
+                <tr>
+                    <td>6. Servicios y API</td>
+                    <td>authService, postsService, categoriesService, commentsService; controladores y endpoints NestJS.</td>
+                    <td>14 h</td>
+                </tr>
+                <tr>
+                    <td>7. Formularios y Editor Avanzado</td>
+                    <td>Formulario con react-hook-form, validaciones, QuillEditor, sanitización.</td>
+                    <td>7 h</td>
+                </tr>
+                <tr>
+                    <td>8. Analítica y Monitoreo</td>
+                    <td>Seguimiento de eventos, métricas de uso, logs estructurados.</td>
+                    <td>6 h</td>
+                </tr>
+                <tr>
+                    <td>9. Infraestructura y DevOps</td>
+                    <td>docker-compose, nginx, scripts de deploy, variables de entorno.</td>
+                    <td>7 h</td>
+                </tr>
+                <tr>
+                    <td>10. Testing Manual y Ajustes Finales</td>
+                    <td>Pruebas UI/UX, textos, validaciones, ajustes visuales.</td>
+                    <td>4 h</td>
+                </tr>
+                <tr>
+                    <td>11. Feedback y Refinamientos</td>
+                    <td>Iteraciones y pequeños cambios tras la revisión del cliente.</td>
+                    <td>4 h</td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="text-align: right; font-weight: bold;">🔹 Total estimado</td>
+                    <td style="font-weight: bold;">140 h</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>💰 Resumen Económico</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Concepto</th>
+                    <th>Monto</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Valor hora (etapa desarrollada)</td>
+                    <td>$3.500</td>
+                </tr>
+                <tr>
+                    <td>Total de horas</td>
+                    <td>140</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">Total correspondiente al trabajo realizado</td>
+                    <td style="font-weight: bold;">$490.000</td>
+                </tr>
+                <tr>
+                    <td>Valor hora a partir de esta instancia</td>
+                    <td>$2.500</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

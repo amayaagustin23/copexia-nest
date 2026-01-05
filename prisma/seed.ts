@@ -1,6 +1,8 @@
 import { PrismaClient } from '@prisma/client';
+// @ts-ignore
 import * as bcrypt from 'bcrypt';
 
+// @ts-ignore
 const prisma = new PrismaClient();
 
 async function main() {

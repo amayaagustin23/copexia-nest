@@ -25,7 +25,7 @@ import { AppService } from './app.service';
     }),
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'uploads'),
-      serveRoot: '/uploads',
+      serveRoot: '/downloads',
     }),
     I18nModuleConfig(),
     PrismaModule,

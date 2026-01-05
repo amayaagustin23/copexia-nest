@@ -29,7 +29,7 @@ export class UploadService {
             await fs.promises.writeFile(filePath, file.buffer);
 
             const appUrl = process.env.APP_URL || 'http://localhost:4000';
-            return `${appUrl}/uploads/${fileName}`;
+            return `${appUrl}/downloads/${fileName}`;
         } catch (error) {
             throw new InternalServerErrorException('Failed to upload file');
         }

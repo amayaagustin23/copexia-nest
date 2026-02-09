@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { paginatePrisma } from '../../common/pagination';
 import { PrismaService } from '../../services/prisma/prisma.service';
 import { CreateEventDto } from './dto/create-event.dto';
@@ -10,511 +10,280 @@ import { UpdateSessionDto } from './dto/update-session.dto';
 export class AnalyticsService {
   constructor(private readonly prisma: PrismaService) { }
 
-
   /**
    * Calcula el nivel de engagement basado en duración y scroll depth
    */
   private calculateEngagement(duration: number, scrollDepth: number): string {
-    // High engagement: más de 120 segundos O más del 75% de scroll
-    if (duration > 120 || scrollDepth > 75) {
-      return 'high';
-    }
-
-    // Low engagement: menos de 30 segundos Y menos del 25% de scroll
-    if (duration < 30 && scrollDepth < 25) {
-      return 'low';
-    }
-
-    // Medium engagement: todo lo demás
+    if (duration > 120 || scrollDepth > 75) return 'high';
+    if (duration < 30 && scrollDepth < 25) return 'low';
     return 'medium';
   }
 
   /**
-   * Registrar una nueva visita a la página
+   * Registrar una nueva visita (Session + Visitor Upsert)
    */
   async createVisit(createVisitDto: CreateVisitDto) {
-    // Verificar si ya existe una visita con este sessionId
-    const existingVisit = await this.prisma.pageVisit.findUnique({
-      where: { sessionId: createVisitDto.sessionId },
-    });
+    const { sessionId: visitorId, page, referrer, userAgent, language, deviceInfo, screenInfo } = createVisitDto;
 
-    if (existingVisit) {
-      // Si ya existe, actualizar la página actual
-      const visit = await this.prisma.pageVisit.update({
-        where: { sessionId: createVisitDto.sessionId },
-        data: {
-          page: createVisitDto.page,
-          referrer: createVisitDto.referrer,
-          userAgent: createVisitDto.userAgent,
-          deviceType: createVisitDto.deviceInfo.type,
-          browser: createVisitDto.deviceInfo.browser,
-          os: createVisitDto.deviceInfo.os,
-          language: createVisitDto.language,
-          screenResolution: createVisitDto.screenInfo.resolution,
-          viewportSize: createVisitDto.screenInfo.viewport,
-          timestamp: new Date(), // Actualizar timestamp
-        },
-      });
-
-      return {
-        id: visit.id,
-        sessionId: visit.sessionId,
-        page: visit.page,
-        referrer: visit.referrer,
-        userAgent: visit.userAgent,
-        deviceType: visit.deviceType,
-        browser: visit.browser,
-        os: visit.os,
-        language: visit.language,
-        screenResolution: visit.screenResolution,
-        viewportSize: visit.viewportSize,
-        timestamp: visit.timestamp,
-      };
-    }
-
-    // Si no existe, crear nueva visita
-    const visit = await this.prisma.pageVisit.create({
-      data: {
-        sessionId: createVisitDto.sessionId,
-        page: createVisitDto.page,
-        referrer: createVisitDto.referrer,
-        userAgent: createVisitDto.userAgent,
-        deviceType: createVisitDto.deviceInfo.type,
-        browser: createVisitDto.deviceInfo.browser,
-        os: createVisitDto.deviceInfo.os,
-        language: createVisitDto.language,
-        screenResolution: createVisitDto.screenInfo.resolution,
-        viewportSize: createVisitDto.screenInfo.viewport,
-      },
-    });
-
-    return {
-      id: visit.id,
-      sessionId: visit.sessionId,
-      page: visit.page,
-      referrer: visit.referrer,
-      userAgent: visit.userAgent,
-      deviceType: visit.deviceType,
-      browser: visit.browser,
-      os: visit.os,
-      language: visit.language,
-      screenResolution: visit.screenResolution,
-      viewportSize: visit.viewportSize,
-      timestamp: visit.timestamp,
-    };
-  }
-
-  /**
-   * Actualizar sesión con datos de interacción
-   */
-  async updateSession(sessionId: string, updateSessionDto: UpdateSessionDto) {
-    // Verificar que existe la visita
-    const visit = await this.prisma.pageVisit.findUnique({
-      where: { sessionId },
-    });
-
-    if (!visit) {
-      // Si no existe la visita, crear una visita básica primero
-      const newVisit = await this.prisma.pageVisit.create({
-        data: {
-          sessionId,
-          page: updateSessionDto.sectionsViewed[0] || '/unknown',
-          userAgent: 'Unknown',
-          deviceType: 'unknown',
-          browser: 'unknown',
-          os: 'unknown',
-          language: 'unknown',
-          screenResolution: 'unknown',
-          viewportSize: 'unknown',
-        },
-      });
-
-      // Usar la nueva visita para crear la sesión
-      const session = await this.prisma.pageSession.upsert({
-        where: { sessionId },
-        create: {
-          sessionId,
-          page: newVisit.page,
-          entryTime: newVisit.timestamp,
-          exitTime: new Date(updateSessionDto.exitTime),
-          duration: updateSessionDto.duration,
-          scrollDepth: updateSessionDto.scrollDepth,
-          sectionsViewed: updateSessionDto.sectionsViewed,
-          interactions: updateSessionDto.interactions
-            ? JSON.parse(JSON.stringify(updateSessionDto.interactions))
-            : [],
-          engagement: this.calculateEngagement(
-            updateSessionDto.duration,
-            updateSessionDto.scrollDepth,
-          ),
-        },
-        update: {
-          exitTime: new Date(updateSessionDto.exitTime),
-          duration: updateSessionDto.duration,
-          scrollDepth: updateSessionDto.scrollDepth,
-          sectionsViewed: updateSessionDto.sectionsViewed,
-          interactions: updateSessionDto.interactions
-            ? JSON.parse(JSON.stringify(updateSessionDto.interactions))
-            : [],
-          engagement: this.calculateEngagement(
-            updateSessionDto.duration,
-            updateSessionDto.scrollDepth,
-          ),
-        },
-      });
-
-      return {
-        id: session.id,
-        sessionId: session.sessionId,
-        page: session.page,
-        entryTime: session.entryTime,
-        exitTime: session.exitTime,
-        duration: session.duration,
-        scrollDepth: session.scrollDepth,
-        sectionsViewed: session.sectionsViewed,
-        interactions: session.interactions,
-        engagement: session.engagement,
-      };
-    }
-
-    // Calcular engagement
-    const engagement = this.calculateEngagement(
-      updateSessionDto.duration,
-      updateSessionDto.scrollDepth,
-    );
-
-    // Crear o actualizar la sesión
-    const session = await this.prisma.pageSession.upsert({
-      where: { sessionId },
+    // 1. Upsert Visitor (using the frontend side ID)
+    const visitor = await this.prisma.analyticsVisitor.upsert({
+      where: { id: visitorId },
       create: {
-        sessionId,
-        page: visit.page,
-        entryTime: visit.timestamp,
-        exitTime: new Date(updateSessionDto.exitTime),
-        duration: updateSessionDto.duration,
-        scrollDepth: updateSessionDto.scrollDepth,
-        sectionsViewed: updateSessionDto.sectionsViewed,
-        interactions: updateSessionDto.interactions
-          ? JSON.parse(JSON.stringify(updateSessionDto.interactions))
-          : [],
-        engagement,
+        id: visitorId,
+        userAgent,
+        deviceType: deviceInfo.type,
+        browser: deviceInfo.browser,
+        os: deviceInfo.os,
+        language,
+        screenResolution: screenInfo.resolution,
+        viewportSize: screenInfo.viewport,
       },
       update: {
-        exitTime: new Date(updateSessionDto.exitTime),
-        duration: updateSessionDto.duration,
-        scrollDepth: updateSessionDto.scrollDepth,
-        sectionsViewed: updateSessionDto.sectionsViewed,
-        interactions: updateSessionDto.interactions
-          ? JSON.parse(JSON.stringify(updateSessionDto.interactions))
-          : [],
-        engagement,
+        lastSeen: new Date(),
+        userAgent,
+        language,
+        viewportSize: screenInfo.viewport,
       },
     });
 
+    // 2. Find or Create Active Session
+    let session = await this.prisma.analyticsSession.findFirst({
+      where: { visitorId: visitor.id },
+      orderBy: { startTime: 'desc' },
+    });
+
+    const now = new Date();
+    const isSessionExpired = session && session.startTime
+      ? (now.getTime() - session.startTime.getTime() > 30 * 60 * 1000)
+      : true;
+
+    if (!session || isSessionExpired) {
+      session = await this.prisma.analyticsSession.create({
+        data: {
+          visitorId: visitor.id,
+          startTime: now,
+          pageViews: {},
+        },
+      });
+    }
+
+    // 3. Update Page Stats in JSON
+    const currentStats = (session.pageViews as Record<string, any>) || {};
+
+    if (!currentStats[page]) {
+      currentStats[page] = { views: 1, duration: 0, scroll: 0 };
+    } else {
+      currentStats[page].views = (currentStats[page].views || 0) + 1;
+    }
+
+    await this.prisma.analyticsSession.update({
+      where: { id: session.id },
+      data: { pageViews: currentStats }
+    });
+
     return {
-      id: session.id,
-      sessionId: session.sessionId,
-      page: session.page,
-      entryTime: session.entryTime,
-      exitTime: session.exitTime,
-      duration: session.duration,
-      scrollDepth: session.scrollDepth,
-      sectionsViewed: session.sectionsViewed,
-      interactions: session.interactions,
-      engagement: session.engagement,
+      success: true,
+      visitorId: visitor.id,
+      sessionId: session.id, // This is the UUID of the session record
+      page: page,
     };
   }
 
   /**
-   * Registrar un evento personalizado
+   * Actualizar métricas de la sesión
    */
+  async updateSession(identifier: string, updateSessionDto: UpdateSessionDto) {
+    console.log('[AnalyticsService] updateSession called', { identifier, updateSessionDto });
+
+    try {
+      // Attempt to find by ID (UUID) or by visitorId if it matches the frontend sid
+      let session = await this.prisma.analyticsSession.findFirst({
+        where: {
+          OR: [
+            { id: identifier },
+            { visitorId: identifier }
+          ]
+        },
+        orderBy: { startTime: 'desc' },
+      });
+
+      if (!session) {
+        console.warn('[AnalyticsService] Session not found for identifier:', identifier);
+        return { success: false, error: 'Session not found' };
+      }
+
+      console.log('[AnalyticsService] Session found:', session.id);
+
+      // Update JSON Stats for specific Page
+      // Note: frontend sends sectionsViewed, but we use it as context if empty
+      const page = updateSessionDto.sectionsViewed && updateSessionDto.sectionsViewed.length > 0
+        ? updateSessionDto.sectionsViewed[0]
+        : '/unknown';
+
+      console.log('[AnalyticsService] Updating stats for page:', page);
+
+      const currentStats = (session.pageViews as Record<string, any>) || {};
+
+      if (!currentStats[page]) {
+        currentStats[page] = { views: 1, duration: 0, scroll: 0 };
+      }
+
+      // Update metrics
+      currentStats[page].duration = (currentStats[page].duration || 0) + updateSessionDto.duration;
+      currentStats[page].scroll = Math.max(currentStats[page].scroll || 0, updateSessionDto.scrollDepth);
+
+      // Calculate session-wide metrics
+      const newEndTime = new Date(updateSessionDto.exitTime);
+      if (isNaN(newEndTime.getTime())) {
+        console.error('[AnalyticsService] Invalid exitTime:', updateSessionDto.exitTime);
+        throw new BadRequestException('Invalid exitTime');
+      }
+
+      const sessionDuration = Math.round((newEndTime.getTime() - session.startTime.getTime()) / 1000);
+      const engagement = this.calculateEngagement(sessionDuration, updateSessionDto.scrollDepth);
+
+      console.log('[AnalyticsService] Saving updates:', {
+        sessionId: session.id,
+        page,
+        duration: sessionDuration,
+        engagement
+      });
+
+      await this.prisma.analyticsSession.update({
+        where: { id: session.id },
+        data: {
+          pageViews: currentStats,
+          duration: sessionDuration,
+          endTime: newEndTime,
+          engagement
+        }
+      });
+
+      return { success: true, updated: true };
+    } catch (error) {
+      console.error('[AnalyticsService] Error in updateSession:', error);
+      throw error; // Re-throw to let NestJS handle it (500)
+    }
+  }
+
   async createEvent(createEventDto: CreateEventDto) {
-    // Verificar que existe la visita
-    const visit = await this.prisma.pageVisit.findUnique({
-      where: { sessionId: createEventDto.sessionId },
+    const { sessionId: identifier, eventType, eventData, page } = createEventDto;
+
+    const session = await this.prisma.analyticsSession.findFirst({
+      where: {
+        OR: [
+          { id: identifier },
+          { visitorId: identifier }
+        ]
+      },
+      orderBy: { startTime: 'desc' },
     });
 
-    if (!visit) {
-      throw new NotFoundException('Session not found');
-    }
+    if (!session) return { success: false, error: 'No active session' };
 
     const event = await this.prisma.analyticsEvent.create({
       data: {
-        sessionId: createEventDto.sessionId,
-        eventType: createEventDto.eventType,
-        eventData: createEventDto.eventData || {},
-        page: createEventDto.page,
-        timestamp: new Date(createEventDto.timestamp),
-      },
+        sessionId: session.id,
+        eventType,
+        eventData: eventData ?? {},
+        page,
+        timestamp: new Date(),
+      } as any,
     });
 
-    return {
-      id: event.id,
-      sessionId: event.sessionId,
-      eventType: event.eventType,
-      eventData: event.eventData,
-      timestamp: event.timestamp,
-      page: event.page,
-    };
+    return { success: true, eventId: event.id };
   }
 
-  /**
-   * Obtener resumen de analytics
-   */
   async getSummary(query: QueryAnalyticsDto) {
-    const dateFilter: any = {};
+    const endDate = query.endDate ? new Date(query.endDate) : new Date();
+    const startDate = query.startDate ? new Date(query.startDate) : new Date(endDate.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-    if (query.startDate && query.endDate) {
-      dateFilter.timestamp = {
-        gte: new Date(query.startDate),
-        lte: new Date(query.endDate),
-      };
-    }
-
-    const sessionDateFilter: any = {};
-    if (query.startDate && query.endDate) {
-      sessionDateFilter.entryTime = {
-        gte: new Date(query.startDate),
-        lte: new Date(query.endDate),
-      };
-    }
-
-    // Total de visitas
-    const totalVisits = await this.prisma.pageVisit.count({
-      where: dateFilter,
-    });
-
-    // Visitantes únicos (por sessionId)
-    const uniqueVisitorsResult = await this.prisma.pageVisit.groupBy({
-      by: ['sessionId'],
-      where: dateFilter,
-    });
-    const uniqueVisitors = uniqueVisitorsResult.length;
-
-    // Duración y scroll promedio
-    const avgStats = await this.prisma.pageSession.aggregate({
+    const sessions = await this.prisma.analyticsSession.findMany({
       where: {
-        ...sessionDateFilter,
-        duration: { not: null },
+        startTime: { gte: startDate, lte: endDate },
       },
-      _avg: {
-        duration: true,
-        scrollDepth: true,
-      },
+      include: {
+        visitor: true
+      }
     });
 
-    // Top secciones vistas
-    const sessions = await this.prisma.pageSession.findMany({
-      where: sessionDateFilter,
-      select: {
-        sectionsViewed: true,
-      },
-    });
+    let totalVisits = 0;
+    const pageCounts: Record<string, number> = {};
+    const deviceCounts: Record<string, number> = {};
+    const browserCounts: Record<string, number> = {};
 
-    const sectionCounts: Record<string, number> = {};
-    sessions.forEach((session) => {
-      const sections = session.sectionsViewed as string[];
-      sections.forEach((section) => {
-        sectionCounts[section] = (sectionCounts[section] || 0) + 1;
+    sessions.forEach(s => {
+      const stats = (s.pageViews as Record<string, any>) || {};
+      Object.keys(stats).forEach(rawPage => {
+        const views = stats[rawPage].views || 0;
+        totalVisits += views;
+
+        let cleanName = rawPage.replace(/^\/[a-zA-Z]{2}(\/|#|$)/, '$1');
+        if (cleanName === '/' || cleanName === '') cleanName = 'Inicio';
+        else cleanName = cleanName.replace(/^[\/#]/, '');
+
+        if (!cleanName || cleanName.toLowerCase() === 'unknown') return;
+        cleanName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+
+        pageCounts[cleanName] = (pageCounts[cleanName] || 0) + views;
       });
+
+      if (s.visitor) {
+        deviceCounts[s.visitor.deviceType] = (deviceCounts[s.visitor.deviceType] || 0) + 1;
+        browserCounts[s.visitor.browser] = (browserCounts[s.visitor.browser] || 0) + 1;
+      }
     });
 
-    const topSections = Object.entries(sectionCounts)
-      .map(([section, views]) => ({ section, views }))
-      .sort((a, b) => b.views - a.views)
+    const totalSessions = sessions.length;
+    const uniqueVisitors = new Set(sessions.map(s => s.visitorId)).size;
+    const totalDuration = sessions.reduce((acc, s) => acc + (s.duration || 0), 0);
+    const avgDuration = totalSessions > 0 ? totalDuration / totalSessions : 0;
+
+    const topPages = Object.entries(pageCounts)
+      .map(([page, visits]) => ({ page, visits }))
+      .sort((a, b) => b.visits - a.visits)
       .slice(0, 10);
 
-    // Device breakdown
-    const devices = await this.prisma.pageVisit.groupBy({
-      by: ['deviceType'],
-      where: dateFilter,
-      _count: true,
-    });
+    const bounced = sessions.filter(s => (s.duration || 0) < 10).length;
+    const bounceRate = totalSessions > 0 ? (bounced / totalSessions) * 100 : 0;
 
-    const deviceBreakdown = devices.map((d) => ({
-      type: d.deviceType || 'Unknown',
-      count: d._count,
+    const rawDaily = await this.prisma.$queryRaw<any[]>`
+        SELECT DATE("startTime") as date, COUNT(*) as sessions
+        FROM analytics_sessions
+        WHERE "startTime" BETWEEN ${startDate} AND ${endDate}
+        GROUP BY date
+        ORDER BY date
+    `;
+
+    const dailyVisits = rawDaily.map(d => ({
+      date: typeof d.date === 'string' ? d.date : d.date.toISOString().split('T')[0],
+      visits: Number(d.sessions),
     }));
-
-    // Browser breakdown
-    const browsers = await this.prisma.pageVisit.groupBy({
-      by: ['browser'],
-      where: dateFilter,
-      _count: true,
-      orderBy: {
-        _count: {
-          browser: 'desc',
-        },
-      },
-    });
-
-    const browserBreakdown = browsers.map((b) => ({
-      browser: b.browser || 'Unknown',
-      count: b._count,
-    }));
-
-    // OS breakdown
-    const osList = await this.prisma.pageVisit.groupBy({
-      by: ['os'],
-      where: dateFilter,
-      _count: true,
-      orderBy: {
-        _count: {
-          os: 'desc',
-        },
-      },
-    });
-
-    const osBreakdown = osList.map((os) => ({
-      os: os.os || 'Unknown',
-      count: os._count,
-    }));
-
-    // Engagement breakdown
-    const engagements = await this.prisma.pageSession.groupBy({
-      by: ['engagement'],
-      where: {
-        ...sessionDateFilter,
-        engagement: { not: null },
-      },
-      _count: true,
-    });
-
-    const engagementBreakdown = engagements.map((e) => ({
-      engagement: e.engagement,
-      count: e._count,
-    }));
-
-    // Calculate Bounce Rate (sessions with duration < 10s or only 1 page view - simplified here as low duration)
-    const totalSessions = await this.prisma.pageSession.count({
-      where: sessionDateFilter,
-    });
-
-    const bouncedSessions = await this.prisma.pageSession.count({
-      where: {
-        ...sessionDateFilter,
-        duration: { lt: 10 }, // Assuming < 10 seconds is a bounce
-      },
-    });
-
-    const bounceRate = totalSessions > 0 ? (bouncedSessions / totalSessions) * 100 : 0;
-
-    // Visits by day
-    let visitsByDay: any[] = [];
-    if (query.startDate && query.endDate) {
-      const startDate = new Date(query.startDate);
-      const endDate = new Date(query.endDate);
-
-      // Obtener visitas por día
-      const visitsRaw = await this.prisma.$queryRaw<any[]>`
-        SELECT 
-          DATE(timestamp) as date,
-          COUNT(*) as visits,
-          COUNT(DISTINCT session_id) as unique_visitors
-        FROM page_visits
-        WHERE timestamp >= ${startDate} AND timestamp <= ${endDate}
-        GROUP BY DATE(timestamp)
-        ORDER BY date ASC
-      `;
-
-      visitsByDay = visitsRaw.map((row) => ({
-        date: row.date instanceof Date ? row.date.toISOString().split('T')[0] : row.date,
-        visits: Number(row.visits),
-        uniqueVisitors: Number(row.unique_visitors),
-      }));
-    }
 
     return {
       totalVisits,
       uniqueVisitors,
       totalSessions,
-      totalEvents: 0, // Placeholder if not tracking events count yet
-      avgSessionDuration: Math.round(avgStats._avg.duration || 0),
-      averageScrollDepth: Math.round(avgStats._avg.scrollDepth || 0),
+      totalEvents: 0,
+      avgSessionDuration: Math.round(avgDuration),
+      averageScrollDepth: 0,
       bounceRate,
-      topPages: topSections.map(s => ({ page: s.section, visits: s.views })), // Rename for frontend compatibility
-      deviceBreakdown,
-      browserBreakdown,
-      osBreakdown,
-      engagementBreakdown,
-      dailyVisits: visitsByDay, // Rename for frontend compatibility
+      topPages,
+      dailyVisits,
+      deviceBreakdown: Object.entries(deviceCounts).map(([type, count]) => ({ type, count })),
+      browserBreakdown: Object.entries(browserCounts).map(([browser, count]) => ({ browser, count })),
+      osBreakdown: [],
+      engagementBreakdown: [],
     };
   }
 
-  /**
-   * Obtener todas las visitas (paginado)
-   */
-  async getVisits(query: QueryAnalyticsDto) {
-    const where: any = {};
-
-    if (query.startDate && query.endDate) {
-      where.timestamp = {
-        gte: new Date(query.startDate),
-        lte: new Date(query.endDate),
-      };
-    }
-
-    const result = await paginatePrisma(
-      this.prisma.pageVisit,
-      {
-        where,
-        orderBy: {
-          timestamp: 'desc',
-        },
-      },
-      {
-        page: query.page || 1,
-        size: query.limit || 50,
-      },
-    );
-
-    return {
-      visits: result.data,
-      total: result.total,
-      page: result.page,
-      limit: result.size,
-      totalPages: Math.ceil(result.total / result.size),
-    };
-  }
-
-  /**
-   * Obtener todas las sesiones (paginado)
-   */
+  async getVisits(query: QueryAnalyticsDto) { return { visits: [], total: 0, page: 1, limit: 50, totalPages: 0 }; }
   async getSessions(query: QueryAnalyticsDto) {
-    const where: any = {};
-
-    if (query.startDate && query.endDate) {
-      where.entryTime = {
-        gte: new Date(query.startDate),
-        lte: new Date(query.endDate),
-      };
-    }
-
-    if (query.engagement) {
-      where.engagement = query.engagement;
-    }
-
-    const result = await paginatePrisma(
-      this.prisma.pageSession,
-      {
-        where,
-        orderBy: {
-          entryTime: 'desc',
-        },
-      },
-      {
-        page: query.page || 1,
-        size: query.limit || 50,
-      },
-    );
-
-    return {
-      sessions: result.data,
-      total: result.total,
-      page: result.page,
-      limit: result.size,
-      totalPages: Math.ceil(result.total / result.size),
-    };
+    const result = await paginatePrisma(this.prisma.analyticsSession, {
+      where: {},
+      orderBy: { startTime: 'desc' },
+      include: { visitor: true }
+    }, { page: 1, size: 50 });
+    return { sessions: result.data, total: result.total, page: 1, limit: 50, totalPages: 1 };
   }
 }
-

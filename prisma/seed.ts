@@ -7,19 +7,28 @@ const prisma = new PrismaClient();
 
 async function main() {
   const password = await bcrypt.hash('Pass1234', 10);
-
-  // Crear usuario admin
+  // Crear otros usuarios admin
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@copexia.com' },
+    where: { email: 'Agostinaparada70@gmail.com' },
     update: {},
     create: {
-      name: 'Admin Copexia',
-      email: 'admin@copexia.com',
+      name: 'Agostina Parada',
+      email: 'Agostinaparada70@gmail.com',
       password,
     },
   });
 
-  console.log('✅ Usuario admin creado');
+  await prisma.user.upsert({
+    where: { email: 'amayaagustin.2395@gmail.com' },
+    update: {},
+    create: {
+      name: 'Agustin Amaya',
+      email: 'amayaagustin.2395@gmail.com',
+      password,
+    },
+  });
+
+  console.log('✅ Usuarios adicionales creados');
 
   // Crear 12 categorías
   const categories = await Promise.all([

@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { CommentStatus, PostStatus } from '@prisma/client';
 import { paginatePrisma } from '../../common/pagination';
 import { PaginationArgs } from '../../common/pagination/pagination.interface';
-import { EmailService } from '../../services/email/email.service';
+import { MessagingService } from '../../services/messaging/messaging.service';
 import { PrismaService } from '../../services/prisma/prisma.service';
 import { generateSlug } from '../../utils/slug.utils';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -12,8 +12,8 @@ import { UpdatePostDto } from './dto/update-post.dto';
 export class PostsService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly emailService: EmailService,
-  ) {}
+    private readonly messagingService: MessagingService,
+  ) { }
 
   async create(createPostDto: CreatePostDto, authorId: string) {
     const { categoryIds, ...postData } = createPostDto;
@@ -70,11 +70,11 @@ export class PostsService {
       }),
       ...(pagination.startDate &&
         pagination.endDate && {
-          publishedAt: {
-            gte: pagination.startDate,
-            lte: pagination.endDate,
-          },
-        }),
+        publishedAt: {
+          gte: pagination.startDate,
+          lte: pagination.endDate,
+        },
+      }),
     };
 
     const orderBy: any =
@@ -133,11 +133,11 @@ export class PostsService {
       }),
       ...(pagination.startDate &&
         pagination.endDate && {
-          createdAt: {
-            gte: pagination.startDate,
-            lte: pagination.endDate,
-          },
-        }),
+        createdAt: {
+          gte: pagination.startDate,
+          lte: pagination.endDate,
+        },
+      }),
     };
 
     const orderBy: any =
@@ -406,7 +406,7 @@ export class PostsService {
 
     if (isHundredMilestone || isThousandMilestone) {
       try {
-        await this.emailService.sendViewMilestoneNotification(
+        await this.messagingService.sendViewMilestoneNotification(
           post.title,
           post.slug,
           viewCount,
@@ -424,35 +424,26 @@ export class PostsService {
   // Método para probar notificaciones de visualizaciones
   async testViewMilestoneNotifications() {
     try {
-      // Importar EmailService dinámicamente
-      const { EmailService } = await import(
-        '../../services/email/email.service'
-      );
-      const { ConfigService } = await import('@nestjs/config');
-
-      const configService = new ConfigService();
-      const emailService = new EmailService(configService);
-
       const results = {
         hundredMilestone: false,
         thousandMilestone: false,
       };
 
       // 1. Probar notificación de 100 visualizaciones
-      results.hundredMilestone =
-        await emailService.sendViewMilestoneNotification(
-          'Post de Prueba - 100 Visualizaciones',
-          'test-post-100-views',
-          100,
-        );
+      await this.messagingService.sendViewMilestoneNotification(
+        'Post de Prueba - 100 Visualizaciones',
+        'test-post-100-views',
+        100,
+      );
+      results.hundredMilestone = true;
 
       // 2. Probar notificación de 1000 visualizaciones
-      results.thousandMilestone =
-        await emailService.sendViewMilestoneNotification(
-          'Post de Prueba - 1000 Visualizaciones',
-          'test-post-1000-views',
-          1000,
-        );
+      await this.messagingService.sendViewMilestoneNotification(
+        'Post de Prueba - 1000 Visualizaciones',
+        'test-post-1000-views',
+        1000,
+      );
+      results.thousandMilestone = true;
 
       return {
         success: true,

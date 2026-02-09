@@ -1,14 +1,14 @@
 import {
-	Body,
-	Controller,
-	Get,
-	HttpCode,
-	HttpStatus,
-	Param,
-	Post,
-	Put,
-	Query,
-	UseGuards,
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Put,
+  Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccessTokenGuard } from '../auth/guards/access-token.guard';
@@ -21,10 +21,9 @@ import { UpdateSessionDto } from './dto/update-session.dto';
 @ApiTags('Analytics')
 @Controller('analytics')
 export class AnalyticsController {
-  constructor(private readonly analyticsService: AnalyticsService) {}
+  constructor(private readonly analyticsService: AnalyticsService) { }
 
   // ******** ENDPOINTS PÚBLICOS ********
-
 
   @Post('visits')
   @HttpCode(HttpStatus.CREATED)
@@ -43,9 +42,19 @@ export class AnalyticsController {
   }
 
   /**
-   * PUT /api/v1/analytics/sessions/:sessionId
+   * Post/Put /api/v1/analytics/sessions/:sessionId
    * Actualizar sesión con duración, scroll e interacciones (público)
+   * Soporta POST para navigator.sendBeacon
    */
+  @Post('sessions/:sessionId')
+  @HttpCode(HttpStatus.OK)
+  async updateSessionPost(
+    @Param('sessionId') sessionId: string,
+    @Body() updateSessionDto: UpdateSessionDto,
+  ) {
+    return this.analyticsService.updateSession(sessionId, updateSessionDto);
+  }
+
   @Put('sessions/:sessionId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Actualizar sesión con datos de interacción' })
@@ -147,4 +156,3 @@ export class AnalyticsController {
     return this.analyticsService.getSessions(query);
   }
 }
-

@@ -24,7 +24,12 @@ export type JwtPayload = {
 
 export const messagingConfig = {
   emailSender: env.EMAIL_SENDER,
-
+  smtp: {
+    host: env.SMTP_HOST,
+    port: parseInt(env.SMTP_PORT, 10),
+    user: env.SMTP_USER,
+    password: env.SMTP_PASSWORD,
+  },
   registerUserUrls: {
     backoffice: env.BACKOFFICE_RESET_PASSWORD_URL,
   },

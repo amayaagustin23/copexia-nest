@@ -5,10 +5,12 @@ import { PrismaModule } from '../../services/prisma/prisma.module';
 import { ContactController } from './contact.controller';
 import { ContactService } from './contact.service';
 
+import { MessagingModule } from '../../services/messaging/messaging.module';
+
 @Module({
-  imports: [ConfigModule, EmailModule, PrismaModule],
+  imports: [ConfigModule, EmailModule, PrismaModule, MessagingModule],
   controllers: [ContactController],
   providers: [ContactService],
   exports: [ContactService],
 })
-export class ContactModule {}
+export class ContactModule { }

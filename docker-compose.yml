@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  backend:
+    container_name: copexia-backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db:5432/copexia
+      - NODE_ENV=production
+      - PORT=4000
+      - APP_URL=https://dev.copexia.amayadev.cloud/api/v1
+      - BACKOFFICE_BASE_URL=https://dev.copexia.amayadev.cloud/es
+      - BACKOFFICE_RESET_PASSWORD_URL=https://dev.copexia.amayadev.cloud/es/reset-password
+      - JWT_SECRET_KEY=production_secret_key_change_me
+      - JWT_EXPIRES_IN=1d
+      - JWT_REFRESH_SECRET_KEY=production_refresh_secret_change_me
+      - JWT_REFRESH_EXPIRES_IN=7d
+      - JWT_RESET_SECRET_KEY=production_reset_secret_change_me
+      - JWT_RESET_EXPIRES_IN=15m
+      - HASH_SALT=12
+      # SMTP Configuration (Updated for Hostinger)
+      - EMAIL_SENDER=Copexia <no-reply-copexia@amayadev.cloud>
+      - SMTP_HOST=smtp.hostinger.com
+      - SMTP_PORT=465
+      - SMTP_USER=no-reply-copexia@amayadev.cloud
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+    ports:
+      - "4000:4000"
+    depends_on:
+      - db
+    networks:
+      - copexia-network
+      - proxy-network
+    restart: always
+
+  db:
+    image: postgres:15-alpine
+    container_name: copexia-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: copexia
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - copexia-network
+    restart: always
+
+networks:
+  copexia-network:
+    driver: bridge
+  proxy-network:
+    external: true
+
+volumes:
+  postgres_data:

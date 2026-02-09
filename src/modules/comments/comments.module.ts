@@ -4,10 +4,12 @@ import { PrismaModule } from '../../services/prisma/prisma.module';
 import { CommentsController } from './comments.controller';
 import { CommentsService } from './comments.service';
 
+import { MessagingModule } from '../../services/messaging/messaging.module';
+
 @Module({
-  imports: [PrismaModule, EmailModule],
+  imports: [PrismaModule, EmailModule, MessagingModule],
   controllers: [CommentsController],
   providers: [CommentsService],
   exports: [CommentsService],
 })
-export class CommentsModule {}
+export class CommentsModule { }

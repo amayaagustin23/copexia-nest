@@ -1,16 +1,20 @@
 import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { Pool } from 'pg';
 // @ts-ignore
 import * as bcrypt from 'bcrypt';
+import 'dotenv/config';
 
-// @ts-ignore
-const prisma = new PrismaClient();
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   const password = await bcrypt.hash('Pass1234', 10);
   // Crear otros usuarios admin
   const admin = await prisma.user.upsert({
     where: { email: 'Agostinaparada70@gmail.com' },
-    update: {},
+    update: { password },
     create: {
       name: 'Agostina Parada',
       email: 'Agostinaparada70@gmail.com',
@@ -20,7 +24,7 @@ async function main() {
 
   await prisma.user.upsert({
     where: { email: 'amayaagustin.2395@gmail.com' },
-    update: {},
+    update: { password },
     create: {
       name: 'Agustin Amaya',
       email: 'amayaagustin.2395@gmail.com',

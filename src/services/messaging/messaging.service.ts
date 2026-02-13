@@ -83,7 +83,7 @@ export class MessagingService {
       commentAuthor,
       commentContent,
       from = this.configService.get('EMAIL_SENDER'),
-      to = 'amayaagustin.2395@gmail.com'
+      to = this.configService.get('ADMIN_EMAIL'),
     } = input;
 
     const subject = `Nuevo comentario: ${postTitle}`;
@@ -106,8 +106,9 @@ export class MessagingService {
     postTitle: string,
     slug: string,
     viewCount: number,
-    adminEmail: string = 'amayaagustin.2395@gmail.com',
+    adminEmail?: string,
   ) {
+    const email = adminEmail || this.configService.get('ADMIN_EMAIL');
     const subject = `🎉 ¡Hito alcanzado! Post "${postTitle}" llegó a ${viewCount} visualizaciones`;
     const body = this.styledEmailService.generateViewMilestoneTemplate(
       postTitle,
@@ -117,7 +118,7 @@ export class MessagingService {
     const textPart = `¡Felicitaciones! El post "${postTitle}" ha alcanzado ${viewCount} visualizaciones.`;
 
     await this.emailService.send({
-      to: adminEmail,
+      to: email,
       subject,
       body,
       text: textPart,
@@ -129,8 +130,9 @@ export class MessagingService {
     email: string,
     subject: string,
     message: string,
-    adminEmail: string = 'contacto@copexia.com',
+    adminEmail?: string,
   ): Promise<boolean> {
+    const toEmail = adminEmail || this.configService.get('ADMIN_EMAIL');
     const emailSubject = `[Formulario de Contacto] ${subject}`;
     const body = this.styledEmailService.generateContactMessageTemplate(
       fullName,
@@ -147,7 +149,7 @@ export class MessagingService {
 
     try {
       await this.emailService.send({
-        to: adminEmail,
+        to: toEmail,
         subject: emailSubject,
         body,
         text: textPart,

@@ -1,4 +1,4 @@
-FROM node:18-bullseye-slim AS builder
+FROM node:22 AS builder
 
 WORKDIR /usr/src/app
 
@@ -26,7 +26,7 @@ COPY . .
 
 RUN npm run build
 
-FROM node:18-bullseye-slim
+FROM node:22
 
 WORKDIR /usr/src/app
 
@@ -43,6 +43,7 @@ COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/prisma ./prisma
 COPY --from=builder /usr/src/app/scripts ./scripts
 COPY --from=builder /usr/src/app/src/i18n ./src/i18n
+COPY --from=builder /usr/src/app/prisma.config.js ./
 
 EXPOSE 4000
 CMD ["npm", "run", "start:prod"]

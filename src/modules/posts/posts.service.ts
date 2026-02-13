@@ -77,6 +77,13 @@ export class PostsService {
       }),
     };
 
+    try {
+      const debugCount = await this.prisma.post.count({ where });
+      console.log('Direct count result:', debugCount);
+    } catch (error) {
+      console.error('Direct count error:', error);
+    }
+
     const orderBy: any =
       pagination.orderBy === 'updatedAt'
         ? [{ isPinned: 'desc' }, { updatedAt: 'desc' }]
@@ -504,6 +511,7 @@ export class PostsService {
       totalViews,
       totalLikes,
       totalComments,
+      totalCategories,
     ] = await Promise.all([
       this.prisma.post.count(),
       this.prisma.post.count({ where: { status: PostStatus.PUBLISHED } }),
@@ -517,6 +525,7 @@ export class PostsService {
         _sum: { likeCount: true },
       }),
       this.prisma.comment.count(), // Contar comentarios directamente desde la tabla
+      this.prisma.category.count(),
     ]);
 
     return {
@@ -528,103 +537,102 @@ export class PostsService {
       totalViews: totalViews._sum.viewCount || 0,
       totalLikes: totalLikes._sum.likeCount || 0,
       totalComments,
+      totalCategories,
     };
   }
 
   async getDashboard() {
-    const [
-      stats,
-      recentPosts,
-      topPosts,
-      categories,
-      recentComments,
-      monthlyStats,
-    ] = await Promise.all([
-      this.getStats(),
-      this.prisma.post.findMany({
-        take: 5,
-        orderBy: { createdAt: 'desc' },
-        include: {
-          author: {
-            select: { id: true, name: true, email: true },
-          },
-          categories: {
-            include: { category: true },
-          },
-          comments: {
-            where: { status: CommentStatus.APPROVED },
-            include: {
-              replies: {
-                where: { status: CommentStatus.APPROVED },
-              },
-            },
-          },
+    const stats = await this.getStats();
+
+    // 1. Fetch Candidates for Top Interactive: Top Liked
+    const topLiked = await this.prisma.post.findMany({
+      take: 20,
+      orderBy: { likeCount: 'desc' },
+      include: {
+        author: { select: { id: true, name: true, email: true } },
+        categories: { include: { category: true } },
+        comments: {
+          where: { status: CommentStatus.APPROVED },
+          include: { replies: { where: { status: CommentStatus.APPROVED } } }
         },
-      }),
+      },
+    });
+
+    // 2. Fetch Candidates: Top Commented
+    const topCommented = await this.prisma.post.findMany({
+      take: 20,
+      orderBy: { comments: { _count: 'desc' } },
+      include: {
+        author: { select: { id: true, name: true, email: true } },
+        categories: { include: { category: true } },
+        comments: {
+          where: { status: CommentStatus.APPROVED },
+          include: { replies: { where: { status: CommentStatus.APPROVED } } }
+        },
+      },
+    });
+
+    // 3. Merge and Sort
+    const mergedPosts = [...topLiked, ...topCommented];
+    const uniquePostsMap = new Map();
+
+    mergedPosts.forEach(post => {
+      if (!uniquePostsMap.has(post.id)) {
+        uniquePostsMap.set(post.id, post);
+      }
+    });
+
+    const topInteractivePosts = Array.from(uniquePostsMap.values())
+      .map((post: any) => {
+        const commentCount = post.comments.reduce((acc: number, comment: any) =>
+          acc + 1 + (comment.replies?.length || 0), 0
+        );
+        return {
+          ...post,
+          interactionScore: post.likeCount + commentCount,
+          commentCount
+        };
+      })
+      .sort((a, b) => b.interactionScore - a.interactionScore)
+      .slice(0, 5);
+
+    // Other Dashboard Data
+    const [topPosts, categories, recentComments, monthlyStats] = await Promise.all([
       this.prisma.post.findMany({
         take: 5,
         orderBy: { viewCount: 'desc' },
         include: {
-          author: {
-            select: { id: true, name: true, email: true },
-          },
-          categories: {
-            include: { category: true },
-          },
+          author: { select: { id: true, name: true, email: true } },
+          categories: { include: { category: true } },
           comments: {
             where: { status: CommentStatus.APPROVED },
-            include: {
-              replies: {
-                where: { status: CommentStatus.APPROVED },
-              },
-            },
-          },
-        },
+            include: { replies: { where: { status: CommentStatus.APPROVED } } }
+          }
+        }
       }),
-      // Todas las categorías con conteo de posts
       this.prisma.category.findMany({
-        include: {
-          _count: {
-            select: { posts: true },
-          },
-        },
+        include: { _count: { select: { posts: true } } },
         orderBy: { sortOrder: 'asc' },
       }),
-      // Comentarios recientes (últimos 10)
       this.prisma.comment.findMany({
         take: 10,
         orderBy: { createdAt: 'desc' },
-        include: {
-          post: {
-            select: { id: true, title: true, slug: true },
-          },
-        },
+        include: { post: { select: { id: true, title: true, slug: true } } }
       }),
-      // Estadísticas mensuales (últimos 6 meses)
       this.getMonthlyStats(),
     ]);
 
-    // Calcular commentCount dinámicamente para posts recientes
-    const recentPostsWithCount = recentPosts.map((post: any) => ({
-      ...post,
-      commentCount: post.comments.reduce(
-        (total: number, comment: any) => total + 1 + comment.replies.length,
-        0,
-      ),
-    }));
-
-    // Calcular commentCount dinámicamente para posts populares
     const topPostsWithCount = topPosts.map((post: any) => ({
       ...post,
       commentCount: post.comments.reduce(
-        (total: number, comment: any) => total + 1 + comment.replies.length,
+        (total: number, comment: any) => total + 1 + (comment.replies?.length || 0),
         0,
       ),
     }));
 
     return {
       stats,
-      recentPosts: recentPostsWithCount,
+      recentPosts: topInteractivePosts,
       topPosts: topPostsWithCount,
       categories,
       recentComments,
@@ -648,21 +656,19 @@ export class PostsService {
       },
     });
 
-    // Agrupar por mes y año
-    const monthlyStats = monthlyData.reduce((acc: any, item: any) => {
-      const monthYear = item.createdAt.toISOString().substring(0, 7); // YYYY-MM
+    const monthlyStatsRaw = monthlyData.reduce((acc: any, item: any) => {
+      const monthYear = item.createdAt.toISOString().substring(0, 7);
       acc[monthYear] = (acc[monthYear] || 0) + item._count.id;
       return acc;
     }, {});
 
-    // Convertir a array con formato legible
-    return Object.entries(monthlyStats).map(([month, count]) => ({
+    return Object.entries(monthlyStatsRaw).map(([month, count]) => ({
       month,
       count,
       label: new Date(month + '-01').toLocaleDateString('es-ES', {
         year: 'numeric',
         month: 'long',
       }),
-    }));
+    })).sort((a, b) => a.month.localeCompare(b.month));
   }
 }

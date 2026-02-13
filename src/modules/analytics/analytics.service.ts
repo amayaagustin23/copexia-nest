@@ -211,6 +211,13 @@ export class AnalyticsService {
     const pageCounts: Record<string, number> = {};
     const deviceCounts: Record<string, number> = {};
     const browserCounts: Record<string, number> = {};
+    const osCounts: Record<string, number> = {};
+
+    const totalEvents = await this.prisma.analyticsEvent.count({
+      where: {
+        timestamp: { gte: startDate, lte: endDate }
+      }
+    });
 
     sessions.forEach(s => {
       const stats = (s.pageViews as Record<string, any>) || {};
@@ -231,7 +238,10 @@ export class AnalyticsService {
       if (s.visitor) {
         deviceCounts[s.visitor.deviceType] = (deviceCounts[s.visitor.deviceType] || 0) + 1;
         browserCounts[s.visitor.browser] = (browserCounts[s.visitor.browser] || 0) + 1;
+        osCounts[s.visitor.os] = (osCounts[s.visitor.os] || 0) + 1;
       }
+
+
     });
 
     const totalSessions = sessions.length;
@@ -248,7 +258,7 @@ export class AnalyticsService {
     const bounceRate = totalSessions > 0 ? (bounced / totalSessions) * 100 : 0;
 
     const rawDaily = await this.prisma.$queryRaw<any[]>`
-        SELECT DATE("startTime") as date, COUNT(*) as sessions
+        SELECT CAST("startTime" AS DATE) as date, COUNT(*) as sessions
         FROM analytics_sessions
         WHERE "startTime" BETWEEN ${startDate} AND ${endDate}
         GROUP BY date
@@ -264,18 +274,18 @@ export class AnalyticsService {
       totalVisits,
       uniqueVisitors,
       totalSessions,
-      totalEvents: 0,
-      avgSessionDuration: Math.round(avgDuration),
+      totalEvents,
       averageScrollDepth: 0,
-      bounceRate,
       topPages,
       dailyVisits,
       deviceBreakdown: Object.entries(deviceCounts).map(([type, count]) => ({ type, count })),
       browserBreakdown: Object.entries(browserCounts).map(([browser, count]) => ({ browser, count })),
-      osBreakdown: [],
-      engagementBreakdown: [],
+      osBreakdown: Object.entries(osCounts)
+        .filter(([os]) => os !== 'Unknown')
+        .map(([os, count]) => ({ os, count })),
     };
   }
+
 
   async getVisits(query: QueryAnalyticsDto) { return { visits: [], total: 0, page: 1, limit: 50, totalPages: 0 }; }
   async getSessions(query: QueryAnalyticsDto) {

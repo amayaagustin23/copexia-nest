@@ -402,6 +402,12 @@ export class PostStatsResponseDto {
     example: 89,
   })
   totalComments: number;
+
+  @ApiProperty({
+    description: 'Total de categorías',
+    example: 12,
+  })
+  totalCategories: number;
 }
 
 export class ErrorResponseDto {

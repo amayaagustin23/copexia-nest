@@ -107,8 +107,7 @@ export class CategoryResponseDto {
   }>;
 }
 
-export class CategoryWithPostsResponseDto extends CategoryResponseDto {
-}
+export class CategoryWithPostsResponseDto extends CategoryResponseDto {}
 
 export class CategoryStatsResponseDto {
   @ApiProperty({

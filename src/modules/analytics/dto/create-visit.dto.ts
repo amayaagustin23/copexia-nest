@@ -1,5 +1,10 @@
 import { Type } from 'class-transformer';
-import { IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
+import {
+  IsObject,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 
 class DeviceInfoDto {
   @IsString()
@@ -47,4 +52,3 @@ export class CreateVisitDto {
   @IsString()
   language: string;
 }
-

@@ -13,4 +13,4 @@ import { MessagingModule } from '../../services/messaging/messaging.module';
   providers: [ContactService],
   exports: [ContactService],
 })
-export class ContactModule { }
+export class ContactModule {}

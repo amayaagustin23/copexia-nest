@@ -113,7 +113,6 @@ export class AuthController {
   @Get('status')
   @HttpCode(HttpStatus.OK)
   checkAuthStatus(@Req() req: Request) {
-
     const token = req.cookies?.token;
     return {
       isAuthenticated: !!token,

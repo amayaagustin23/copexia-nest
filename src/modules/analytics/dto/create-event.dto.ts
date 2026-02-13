@@ -16,4 +16,3 @@ export class CreateEventDto {
   @IsString()
   page: string;
 }
-

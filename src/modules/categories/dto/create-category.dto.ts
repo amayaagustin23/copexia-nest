@@ -1,5 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsHexColor, IsInt, IsOptional, IsString, MaxLength, Min } from 'class-validator';
+import {
+  IsBoolean,
+  IsHexColor,
+  IsInt,
+  IsOptional,
+  IsString,
+  MaxLength,
+  Min,
+} from 'class-validator';
 
 export class CreateCategoryDto {
   @ApiProperty({
@@ -13,7 +21,8 @@ export class CreateCategoryDto {
   name: string;
 
   @ApiProperty({
-    description: 'Slug único para la URL (formato: palabras-separadas-por-guiones)',
+    description:
+      'Slug único para la URL (formato: palabras-separadas-por-guiones)',
     example: 'tecnologia',
     pattern: '^[a-z0-9-]+$',
   })
@@ -22,7 +31,8 @@ export class CreateCategoryDto {
 
   @ApiProperty({
     description: 'Descripción detallada de la categoría',
-    example: 'Artículos sobre tecnología, programación y desarrollo de software',
+    example:
+      'Artículos sobre tecnología, programación y desarrollo de software',
     required: false,
     maxLength: 500,
   })

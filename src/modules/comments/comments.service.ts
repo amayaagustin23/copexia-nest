@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CommentStatus } from '@prisma/client';
 import { paginatePrisma } from '../../common/pagination';
 import { PaginationArgs } from '../../common/pagination/pagination.interface';
@@ -12,7 +16,7 @@ export class CommentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly messagingService: MessagingService,
-  ) { }
+  ) {}
 
   async create(createCommentDto: CreateCommentDto) {
     const post = await this.prisma.post.findUnique({
@@ -107,11 +111,11 @@ export class CommentsService {
       }),
       ...(pagination.startDate &&
         pagination.endDate && {
-        createdAt: {
-          gte: pagination.startDate,
-          lte: pagination.endDate,
-        },
-      }),
+          createdAt: {
+            gte: pagination.startDate,
+            lte: pagination.endDate,
+          },
+        }),
     };
 
     const orderBy: any =

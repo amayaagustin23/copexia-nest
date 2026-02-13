@@ -11,7 +11,7 @@ export class MessagingService {
     private readonly i18n: I18nService,
     private readonly styledEmailService: StyledEmailService,
     private readonly configService: ConfigService,
-  ) { }
+  ) {}
 
   async sendRegisterUserEmail(input: {
     from: string;

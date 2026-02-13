@@ -26,5 +26,4 @@ export const envValidationSchema = Joi.object({
   BACKOFFICE_RESET_PASSWORD_URL: Joi.string().required(),
   BACKOFFICE_BASE_URL: Joi.string().required(),
   APP_URL: Joi.string().required(),
-
 });

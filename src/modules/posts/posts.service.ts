@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CommentStatus, PostStatus } from '@prisma/client';
 import { paginatePrisma } from '../../common/pagination';
 import { PaginationArgs } from '../../common/pagination/pagination.interface';
@@ -13,7 +17,7 @@ export class PostsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly messagingService: MessagingService,
-  ) { }
+  ) {}
 
   async create(createPostDto: CreatePostDto, authorId: string) {
     const { categoryIds, ...postData } = createPostDto;
@@ -70,11 +74,11 @@ export class PostsService {
       }),
       ...(pagination.startDate &&
         pagination.endDate && {
-        publishedAt: {
-          gte: pagination.startDate,
-          lte: pagination.endDate,
-        },
-      }),
+          publishedAt: {
+            gte: pagination.startDate,
+            lte: pagination.endDate,
+          },
+        }),
     };
 
     try {
@@ -140,11 +144,11 @@ export class PostsService {
       }),
       ...(pagination.startDate &&
         pagination.endDate && {
-        createdAt: {
-          gte: pagination.startDate,
-          lte: pagination.endDate,
-        },
-      }),
+          createdAt: {
+            gte: pagination.startDate,
+            lte: pagination.endDate,
+          },
+        }),
     };
 
     const orderBy: any =
@@ -553,7 +557,7 @@ export class PostsService {
         categories: { include: { category: true } },
         comments: {
           where: { status: CommentStatus.APPROVED },
-          include: { replies: { where: { status: CommentStatus.APPROVED } } }
+          include: { replies: { where: { status: CommentStatus.APPROVED } } },
         },
       },
     });
@@ -567,7 +571,7 @@ export class PostsService {
         categories: { include: { category: true } },
         comments: {
           where: { status: CommentStatus.APPROVED },
-          include: { replies: { where: { status: CommentStatus.APPROVED } } }
+          include: { replies: { where: { status: CommentStatus.APPROVED } } },
         },
       },
     });
@@ -576,7 +580,7 @@ export class PostsService {
     const mergedPosts = [...topLiked, ...topCommented];
     const uniquePostsMap = new Map();
 
-    mergedPosts.forEach(post => {
+    mergedPosts.forEach((post) => {
       if (!uniquePostsMap.has(post.id)) {
         uniquePostsMap.set(post.id, post);
       }
@@ -584,48 +588,54 @@ export class PostsService {
 
     const topInteractivePosts = Array.from(uniquePostsMap.values())
       .map((post: any) => {
-        const commentCount = post.comments.reduce((acc: number, comment: any) =>
-          acc + 1 + (comment.replies?.length || 0), 0
+        const commentCount = post.comments.reduce(
+          (acc: number, comment: any) =>
+            acc + 1 + (comment.replies?.length || 0),
+          0,
         );
         return {
           ...post,
           interactionScore: post.likeCount + commentCount,
-          commentCount
+          commentCount,
         };
       })
       .sort((a, b) => b.interactionScore - a.interactionScore)
       .slice(0, 5);
 
     // Other Dashboard Data
-    const [topPosts, categories, recentComments, monthlyStats] = await Promise.all([
-      this.prisma.post.findMany({
-        take: 5,
-        orderBy: { viewCount: 'desc' },
-        include: {
-          author: { select: { id: true, name: true, email: true } },
-          categories: { include: { category: true } },
-          comments: {
-            where: { status: CommentStatus.APPROVED },
-            include: { replies: { where: { status: CommentStatus.APPROVED } } }
-          }
-        }
-      }),
-      this.prisma.category.findMany({
-        include: { _count: { select: { posts: true } } },
-        orderBy: { sortOrder: 'asc' },
-      }),
-      this.prisma.comment.findMany({
-        take: 10,
-        orderBy: { createdAt: 'desc' },
-        include: { post: { select: { id: true, title: true, slug: true } } }
-      }),
-      this.getMonthlyStats(),
-    ]);
+    const [topPosts, categories, recentComments, monthlyStats] =
+      await Promise.all([
+        this.prisma.post.findMany({
+          take: 5,
+          orderBy: { viewCount: 'desc' },
+          include: {
+            author: { select: { id: true, name: true, email: true } },
+            categories: { include: { category: true } },
+            comments: {
+              where: { status: CommentStatus.APPROVED },
+              include: {
+                replies: { where: { status: CommentStatus.APPROVED } },
+              },
+            },
+          },
+        }),
+        this.prisma.category.findMany({
+          include: { _count: { select: { posts: true } } },
+          orderBy: { sortOrder: 'asc' },
+        }),
+        this.prisma.comment.findMany({
+          take: 10,
+          orderBy: { createdAt: 'desc' },
+          include: { post: { select: { id: true, title: true, slug: true } } },
+        }),
+        this.getMonthlyStats(),
+      ]);
 
     const topPostsWithCount = topPosts.map((post: any) => ({
       ...post,
       commentCount: post.comments.reduce(
-        (total: number, comment: any) => total + 1 + (comment.replies?.length || 0),
+        (total: number, comment: any) =>
+          total + 1 + (comment.replies?.length || 0),
         0,
       ),
     }));
@@ -662,13 +672,15 @@ export class PostsService {
       return acc;
     }, {});
 
-    return Object.entries(monthlyStatsRaw).map(([month, count]) => ({
-      month,
-      count,
-      label: new Date(month + '-01').toLocaleDateString('es-ES', {
-        year: 'numeric',
-        month: 'long',
-      }),
-    })).sort((a, b) => a.month.localeCompare(b.month));
+    return Object.entries(monthlyStatsRaw)
+      .map(([month, count]) => ({
+        month,
+        count,
+        label: new Date(month + '-01').toLocaleDateString('es-ES', {
+          year: 'numeric',
+          month: 'long',
+        }),
+      }))
+      .sort((a, b) => a.month.localeCompare(b.month));
   }
 }

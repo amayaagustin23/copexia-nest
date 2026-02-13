@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { paginatePrisma } from '../../common/pagination';
 import { PaginationArgs } from '../../common/pagination/pagination.interface';
 import { PrismaService } from '../../services/prisma/prisma.service';

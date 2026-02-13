@@ -1,4 +1,10 @@
-import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export class SendContactMessageDto {
   @IsNotEmpty({ message: 'El nombre completo es requerido' })
@@ -20,6 +26,8 @@ export class SendContactMessageDto {
   @IsNotEmpty({ message: 'El mensaje es requerido' })
   @IsString({ message: 'El mensaje debe ser una cadena de texto' })
   @MinLength(10, { message: 'El mensaje debe tener al menos 10 caracteres' })
-  @MaxLength(2000, { message: 'El mensaje no puede exceder los 2000 caracteres' })
+  @MaxLength(2000, {
+    message: 'El mensaje no puede exceder los 2000 caracteres',
+  })
   message: string;
 }

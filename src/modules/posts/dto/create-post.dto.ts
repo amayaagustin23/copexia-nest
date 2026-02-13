@@ -1,6 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { PostStatus } from '@prisma/client';
-import { IsArray, IsBoolean, IsEnum, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsEnum,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 
 export class CreatePostDto {
   @ApiProperty({
@@ -15,15 +23,18 @@ export class CreatePostDto {
 
   @ApiProperty({
     description: 'Contenido del post en formato markdown',
-    example: '# Introducción a NestJS\n\nNestJS es un framework progresivo de Node.js para construir aplicaciones del lado del servidor eficientes y escalables.',
+    example:
+      '# Introducción a NestJS\n\nNestJS es un framework progresivo de Node.js para construir aplicaciones del lado del servidor eficientes y escalables.',
     minLength: 10,
   })
   @IsString()
   content: string;
 
   @ApiProperty({
-    description: 'Resumen del post (se genera automáticamente si no se proporciona)',
-    example: 'Aprende los fundamentos de NestJS, el framework de Node.js que está revolucionando el desarrollo backend.',
+    description:
+      'Resumen del post (se genera automáticamente si no se proporciona)',
+    example:
+      'Aprende los fundamentos de NestJS, el framework de Node.js que está revolucionando el desarrollo backend.',
     required: false,
     maxLength: 500,
   })
@@ -64,7 +75,10 @@ export class CreatePostDto {
 
   @ApiProperty({
     description: 'IDs de las categorías a las que pertenece el post',
-    example: ['123e4567-e89b-12d3-a456-426614174000', '456e7890-e89b-12d3-a456-426614174001'],
+    example: [
+      '123e4567-e89b-12d3-a456-426614174000',
+      '456e7890-e89b-12d3-a456-426614174001',
+    ],
     type: [String],
     isArray: true,
   })

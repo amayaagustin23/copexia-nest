@@ -13,4 +13,4 @@ const mailServiceProvider: Provider = {
   providers: [mailServiceProvider, MessagingService, EmailService],
   exports: [MessagingService],
 })
-export class MessagingModule { }
+export class MessagingModule {}

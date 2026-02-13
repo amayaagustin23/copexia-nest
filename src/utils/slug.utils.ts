@@ -4,7 +4,10 @@
  * @param existingSlugs - Array de slugs existentes para evitar duplicados
  * @returns Un slug único
  */
-export function generateSlug(title: string, existingSlugs: string[] = []): string {
+export function generateSlug(
+  title: string,
+  existingSlugs: string[] = [],
+): string {
   // Convertir a minúsculas y reemplazar caracteres especiales
   let slug = title
     .toLowerCase()

@@ -37,5 +37,3 @@ export const messagingConfig = {
     backoffice: env.BACKOFFICE_RESET_PASSWORD_URL,
   },
 } as const;
-
-

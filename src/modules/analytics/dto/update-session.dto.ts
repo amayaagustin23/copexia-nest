@@ -1,13 +1,13 @@
 import { Type } from 'class-transformer';
 import {
-	IsArray,
-	IsDateString,
-	IsNumber,
-	IsOptional,
-	IsString,
-	Max,
-	Min,
-	ValidateNested,
+  IsArray,
+  IsDateString,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+  ValidateNested,
 } from 'class-validator';
 
 class InteractionDto {
@@ -50,4 +50,3 @@ export class UpdateSessionDto {
   @IsOptional()
   interactions?: InteractionDto[];
 }
-

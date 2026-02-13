@@ -232,9 +232,9 @@ export class PostResponseDto {
       properties: {
         category: {
           type: 'object',
-          $ref: '#/components/schemas/CategoryResponseDto'
-        }
-      }
+          $ref: '#/components/schemas/CategoryResponseDto',
+        },
+      },
     },
   })
   categories: Array<{ category: CategoryResponseDto }>;
@@ -338,9 +338,9 @@ export class PostListResponseDto {
       properties: {
         category: {
           type: 'object',
-          $ref: '#/components/schemas/CategoryResponseDto'
-        }
-      }
+          $ref: '#/components/schemas/CategoryResponseDto',
+        },
+      },
     },
   })
   categories: Array<{ category: CategoryResponseDto }>;

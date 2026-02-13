@@ -12,4 +12,4 @@ import { MessagingModule } from '../../services/messaging/messaging.module';
   providers: [CommentsService],
   exports: [CommentsService],
 })
-export class CommentsModule { }
+export class CommentsModule {}

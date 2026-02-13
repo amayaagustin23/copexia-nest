@@ -9,9 +9,14 @@ import { PostsService } from './posts.service';
 import { MessagingModule } from '../../services/messaging/messaging.module';
 
 @Module({
-  imports: [PrismaModule, forwardRef(() => CommentsModule), EmailModule, MessagingModule],
+  imports: [
+    PrismaModule,
+    forwardRef(() => CommentsModule),
+    EmailModule,
+    MessagingModule,
+  ],
   controllers: [PostsAdminController, PostsPublicController],
   providers: [PostsService],
   exports: [PostsService],
 })
-export class PostsModule { }
+export class PostsModule {}

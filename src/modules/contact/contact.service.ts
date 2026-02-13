@@ -1,4 +1,3 @@
-
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MessagingService } from '../../services/messaging/messaging.service';
@@ -13,9 +12,11 @@ export class ContactService {
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
     private readonly messagingService: MessagingService,
-  ) { }
+  ) {}
 
-  async sendContactMessage(contactData: SendContactMessageDto): Promise<boolean> {
+  async sendContactMessage(
+    contactData: SendContactMessageDto,
+  ): Promise<boolean> {
     // Logic to find admin email if needed, or rely on default
     // Assuming logic exists to get admin email or pass undefined
     // For now, passing necessary args
@@ -28,4 +29,3 @@ export class ContactService {
     );
   }
 }
-

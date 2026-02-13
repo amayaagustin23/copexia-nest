@@ -5,9 +5,7 @@ import { ConfigService } from '@nestjs/config';
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
 
-  constructor(private readonly configService: ConfigService) { }
-
-
+  constructor(private readonly configService: ConfigService) {}
 
   private generateFullBodyTemplate(
     title: string,
@@ -802,7 +800,6 @@ export class EmailService {
       content,
     );
   }
-
 
   public generateContactMessageText(
     fullName: string,

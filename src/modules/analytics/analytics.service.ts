@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { paginatePrisma } from '../../common/pagination';
 import { PrismaService } from '../../services/prisma/prisma.service';
 import { CreateEventDto } from './dto/create-event.dto';
@@ -8,7 +12,7 @@ import { UpdateSessionDto } from './dto/update-session.dto';
 
 @Injectable()
 export class AnalyticsService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   /**
    * Calcula el nivel de engagement basado en duración y scroll depth
@@ -23,7 +27,15 @@ export class AnalyticsService {
    * Registrar una nueva visita (Session + Visitor Upsert)
    */
   async createVisit(createVisitDto: CreateVisitDto) {
-    const { sessionId: visitorId, page, referrer, userAgent, language, deviceInfo, screenInfo } = createVisitDto;
+    const {
+      sessionId: visitorId,
+      page,
+      referrer,
+      userAgent,
+      language,
+      deviceInfo,
+      screenInfo,
+    } = createVisitDto;
 
     // 1. Upsert Visitor (using the frontend side ID)
     const visitor = await this.prisma.analyticsVisitor.upsert({
@@ -53,9 +65,10 @@ export class AnalyticsService {
     });
 
     const now = new Date();
-    const isSessionExpired = session && session.startTime
-      ? (now.getTime() - session.startTime.getTime() > 30 * 60 * 1000)
-      : true;
+    const isSessionExpired =
+      session && session.startTime
+        ? now.getTime() - session.startTime.getTime() > 30 * 60 * 1000
+        : true;
 
     if (!session || isSessionExpired) {
       session = await this.prisma.analyticsSession.create({
@@ -78,7 +91,7 @@ export class AnalyticsService {
 
     await this.prisma.analyticsSession.update({
       where: { id: session.id },
-      data: { pageViews: currentStats }
+      data: { pageViews: currentStats },
     });
 
     return {
@@ -93,22 +106,25 @@ export class AnalyticsService {
    * Actualizar métricas de la sesión
    */
   async updateSession(identifier: string, updateSessionDto: UpdateSessionDto) {
-    console.log('[AnalyticsService] updateSession called', { identifier, updateSessionDto });
+    console.log('[AnalyticsService] updateSession called', {
+      identifier,
+      updateSessionDto,
+    });
 
     try {
       // Attempt to find by ID (UUID) or by visitorId if it matches the frontend sid
-      let session = await this.prisma.analyticsSession.findFirst({
+      const session = await this.prisma.analyticsSession.findFirst({
         where: {
-          OR: [
-            { id: identifier },
-            { visitorId: identifier }
-          ]
+          OR: [{ id: identifier }, { visitorId: identifier }],
         },
         orderBy: { startTime: 'desc' },
       });
 
       if (!session) {
-        console.warn('[AnalyticsService] Session not found for identifier:', identifier);
+        console.warn(
+          '[AnalyticsService] Session not found for identifier:',
+          identifier,
+        );
         return { success: false, error: 'Session not found' };
       }
 
@@ -116,9 +132,11 @@ export class AnalyticsService {
 
       // Update JSON Stats for specific Page
       // Note: frontend sends sectionsViewed, but we use it as context if empty
-      const page = updateSessionDto.sectionsViewed && updateSessionDto.sectionsViewed.length > 0
-        ? updateSessionDto.sectionsViewed[0]
-        : '/unknown';
+      const page =
+        updateSessionDto.sectionsViewed &&
+        updateSessionDto.sectionsViewed.length > 0
+          ? updateSessionDto.sectionsViewed[0]
+          : '/unknown';
 
       console.log('[AnalyticsService] Updating stats for page:', page);
 
@@ -129,24 +147,36 @@ export class AnalyticsService {
       }
 
       // Update metrics
-      currentStats[page].duration = (currentStats[page].duration || 0) + updateSessionDto.duration;
-      currentStats[page].scroll = Math.max(currentStats[page].scroll || 0, updateSessionDto.scrollDepth);
+      currentStats[page].duration =
+        (currentStats[page].duration || 0) + updateSessionDto.duration;
+      currentStats[page].scroll = Math.max(
+        currentStats[page].scroll || 0,
+        updateSessionDto.scrollDepth,
+      );
 
       // Calculate session-wide metrics
       const newEndTime = new Date(updateSessionDto.exitTime);
       if (isNaN(newEndTime.getTime())) {
-        console.error('[AnalyticsService] Invalid exitTime:', updateSessionDto.exitTime);
+        console.error(
+          '[AnalyticsService] Invalid exitTime:',
+          updateSessionDto.exitTime,
+        );
         throw new BadRequestException('Invalid exitTime');
       }
 
-      const sessionDuration = Math.round((newEndTime.getTime() - session.startTime.getTime()) / 1000);
-      const engagement = this.calculateEngagement(sessionDuration, updateSessionDto.scrollDepth);
+      const sessionDuration = Math.round(
+        (newEndTime.getTime() - session.startTime.getTime()) / 1000,
+      );
+      const engagement = this.calculateEngagement(
+        sessionDuration,
+        updateSessionDto.scrollDepth,
+      );
 
       console.log('[AnalyticsService] Saving updates:', {
         sessionId: session.id,
         page,
         duration: sessionDuration,
-        engagement
+        engagement,
       });
 
       await this.prisma.analyticsSession.update({
@@ -155,8 +185,8 @@ export class AnalyticsService {
           pageViews: currentStats,
           duration: sessionDuration,
           endTime: newEndTime,
-          engagement
-        }
+          engagement,
+        },
       });
 
       return { success: true, updated: true };
@@ -167,14 +197,16 @@ export class AnalyticsService {
   }
 
   async createEvent(createEventDto: CreateEventDto) {
-    const { sessionId: identifier, eventType, eventData, page } = createEventDto;
+    const {
+      sessionId: identifier,
+      eventType,
+      eventData,
+      page,
+    } = createEventDto;
 
     const session = await this.prisma.analyticsSession.findFirst({
       where: {
-        OR: [
-          { id: identifier },
-          { visitorId: identifier }
-        ]
+        OR: [{ id: identifier }, { visitorId: identifier }],
       },
       orderBy: { startTime: 'desc' },
     });
@@ -196,15 +228,17 @@ export class AnalyticsService {
 
   async getSummary(query: QueryAnalyticsDto) {
     const endDate = query.endDate ? new Date(query.endDate) : new Date();
-    const startDate = query.startDate ? new Date(query.startDate) : new Date(endDate.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const startDate = query.startDate
+      ? new Date(query.startDate)
+      : new Date(endDate.getTime() - 30 * 24 * 60 * 60 * 1000);
 
     const sessions = await this.prisma.analyticsSession.findMany({
       where: {
         startTime: { gte: startDate, lte: endDate },
       },
       include: {
-        visitor: true
-      }
+        visitor: true,
+      },
     });
 
     let totalVisits = 0;
@@ -215,13 +249,13 @@ export class AnalyticsService {
 
     const totalEvents = await this.prisma.analyticsEvent.count({
       where: {
-        timestamp: { gte: startDate, lte: endDate }
-      }
+        timestamp: { gte: startDate, lte: endDate },
+      },
     });
 
-    sessions.forEach(s => {
+    sessions.forEach((s) => {
       const stats = (s.pageViews as Record<string, any>) || {};
-      Object.keys(stats).forEach(rawPage => {
+      Object.keys(stats).forEach((rawPage) => {
         const views = stats[rawPage].views || 0;
         totalVisits += views;
 
@@ -236,17 +270,20 @@ export class AnalyticsService {
       });
 
       if (s.visitor) {
-        deviceCounts[s.visitor.deviceType] = (deviceCounts[s.visitor.deviceType] || 0) + 1;
-        browserCounts[s.visitor.browser] = (browserCounts[s.visitor.browser] || 0) + 1;
+        deviceCounts[s.visitor.deviceType] =
+          (deviceCounts[s.visitor.deviceType] || 0) + 1;
+        browserCounts[s.visitor.browser] =
+          (browserCounts[s.visitor.browser] || 0) + 1;
         osCounts[s.visitor.os] = (osCounts[s.visitor.os] || 0) + 1;
       }
-
-
     });
 
     const totalSessions = sessions.length;
-    const uniqueVisitors = new Set(sessions.map(s => s.visitorId)).size;
-    const totalDuration = sessions.reduce((acc, s) => acc + (s.duration || 0), 0);
+    const uniqueVisitors = new Set(sessions.map((s) => s.visitorId)).size;
+    const totalDuration = sessions.reduce(
+      (acc, s) => acc + (s.duration || 0),
+      0,
+    );
     const avgDuration = totalSessions > 0 ? totalDuration / totalSessions : 0;
 
     const topPages = Object.entries(pageCounts)
@@ -254,7 +291,7 @@ export class AnalyticsService {
       .sort((a, b) => b.visits - a.visits)
       .slice(0, 10);
 
-    const bounced = sessions.filter(s => (s.duration || 0) < 10).length;
+    const bounced = sessions.filter((s) => (s.duration || 0) < 10).length;
     const bounceRate = totalSessions > 0 ? (bounced / totalSessions) * 100 : 0;
 
     const rawDaily = await this.prisma.$queryRaw<any[]>`
@@ -265,8 +302,11 @@ export class AnalyticsService {
         ORDER BY date
     `;
 
-    const dailyVisits = rawDaily.map(d => ({
-      date: typeof d.date === 'string' ? d.date : d.date.toISOString().split('T')[0],
+    const dailyVisits = rawDaily.map((d) => ({
+      date:
+        typeof d.date === 'string'
+          ? d.date
+          : d.date.toISOString().split('T')[0],
       visits: Number(d.sessions),
     }));
 
@@ -278,22 +318,38 @@ export class AnalyticsService {
       averageScrollDepth: 0,
       topPages,
       dailyVisits,
-      deviceBreakdown: Object.entries(deviceCounts).map(([type, count]) => ({ type, count })),
-      browserBreakdown: Object.entries(browserCounts).map(([browser, count]) => ({ browser, count })),
+      deviceBreakdown: Object.entries(deviceCounts).map(([type, count]) => ({
+        type,
+        count,
+      })),
+      browserBreakdown: Object.entries(browserCounts).map(
+        ([browser, count]) => ({ browser, count }),
+      ),
       osBreakdown: Object.entries(osCounts)
         .filter(([os]) => os !== 'Unknown')
         .map(([os, count]) => ({ os, count })),
     };
   }
 
-
-  async getVisits(query: QueryAnalyticsDto) { return { visits: [], total: 0, page: 1, limit: 50, totalPages: 0 }; }
+  async getVisits(query: QueryAnalyticsDto) {
+    return { visits: [], total: 0, page: 1, limit: 50, totalPages: 0 };
+  }
   async getSessions(query: QueryAnalyticsDto) {
-    const result = await paginatePrisma(this.prisma.analyticsSession, {
-      where: {},
-      orderBy: { startTime: 'desc' },
-      include: { visitor: true }
-    }, { page: 1, size: 50 });
-    return { sessions: result.data, total: result.total, page: 1, limit: 50, totalPages: 1 };
+    const result = await paginatePrisma(
+      this.prisma.analyticsSession,
+      {
+        where: {},
+        orderBy: { startTime: 'desc' },
+        include: { visitor: true },
+      },
+      { page: 1, size: 50 },
+    );
+    return {
+      sessions: result.data,
+      total: result.total,
+      page: 1,
+      limit: 50,
+      totalPages: 1,
+    };
   }
 }

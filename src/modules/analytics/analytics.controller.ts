@@ -21,7 +21,7 @@ import { UpdateSessionDto } from './dto/update-session.dto';
 @ApiTags('Analytics')
 @Controller('analytics')
 export class AnalyticsController {
-  constructor(private readonly analyticsService: AnalyticsService) { }
+  constructor(private readonly analyticsService: AnalyticsService) {}
 
   // ******** ENDPOINTS PÚBLICOS ********
 

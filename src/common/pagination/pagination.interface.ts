@@ -2,7 +2,9 @@ export interface PaginationArgs {
   page?: number;
   size?: number;
   orderBy?: 'createdAt' | 'updatedAt';
+  order?: 'asc' | 'desc';
   search?: string;
+  status?: string;
   date?: Date;
   startDate?: Date;
   endDate?: Date;

@@ -20,10 +20,8 @@ enum PostStatus {
 }
 
 enum CommentStatus {
-  APPROVED
-  PENDING
-  REJECTED
-  DELETED
+  ACTIVE
+  HIDDEN
 }
 
 model User {
@@ -99,7 +97,7 @@ model Comment {
   authorName    String // Nombre del comentarista
   authorEmail   String? // Email del comentarista (opcional)
   authorWebsite String? // Website del comentarista (opcional)
-  status        CommentStatus @default(PENDING)
+  status        CommentStatus @default(ACTIVE)
   parentId      String?
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt

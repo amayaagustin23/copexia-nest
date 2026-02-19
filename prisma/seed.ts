@@ -881,7 +881,7 @@ async function main() {
           authorName: randomAuthor.name,
           authorEmail: randomAuthor.email,
           authorWebsite: randomAuthor.website,
-          status: Math.random() > 0.3 ? 'APPROVED' : 'PENDING', // 70% aprobados, 30% pendientes
+          status: Math.random() > 0.2 ? 'ACTIVE' : 'HIDDEN', // 80% activos, 20% ocultos
           postId: post.id,
         },
       });

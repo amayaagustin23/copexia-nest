@@ -50,25 +50,18 @@ export class CommentsService {
         authorEmail: createCommentDto.authorEmail || null,
         authorWebsite: createCommentDto.authorWebsite || null,
         postId: createCommentDto.postId,
-        status: CommentStatus.APPROVED,
+        status: CommentStatus.ACTIVE, // Siempre se crea como ACTIVE
         parentId: createCommentDto.parentId || null,
       },
       include: {
         post: {
-          select: {
-            id: true,
-            title: true,
-            slug: true,
-          },
+          select: { id: true, title: true, slug: true },
         },
         parent: {
-          select: {
-            id: true,
-            authorName: true,
-          },
+          select: { id: true, authorName: true },
         },
         replies: {
-          where: { status: CommentStatus.APPROVED },
+          where: { status: CommentStatus.ACTIVE },
           select: {
             id: true,
             content: true,
@@ -93,7 +86,6 @@ export class CommentsService {
         commentContent: comment.content,
       });
     } catch (error) {
-      // Log del error pero no fallar la creación del comentario
       console.error('Error sending email notification:', error);
     }
 
@@ -116,6 +108,10 @@ export class CommentsService {
             lte: pagination.endDate,
           },
         }),
+      // Filtro por estado si se provee
+      ...(pagination.status && pagination.status !== 'ALL' && {
+        status: pagination.status as CommentStatus,
+      }),
     };
 
     const orderBy: any =
@@ -128,19 +124,8 @@ export class CommentsService {
       {
         where,
         include: {
-          post: {
-            select: {
-              id: true,
-              title: true,
-              slug: true,
-            },
-          },
-          parent: {
-            select: {
-              id: true,
-              authorName: true,
-            },
-          },
+          post: { select: { id: true, title: true, slug: true } },
+          parent: { select: { id: true, authorName: true } },
           replies: {
             select: {
               id: true,
@@ -160,33 +145,7 @@ export class CommentsService {
       pagination,
     );
 
-    // Calcular estadísticas
-    const totalComments = await this.prisma.comment.count();
-    const approvedComments = await this.prisma.comment.count({
-      where: { status: CommentStatus.APPROVED },
-    });
-    const pendingComments = await this.prisma.comment.count({
-      where: { status: CommentStatus.PENDING },
-    });
-    const rejectedComments = await this.prisma.comment.count({
-      where: { status: CommentStatus.REJECTED },
-    });
-    const deletedComments = await this.prisma.comment.count({
-      where: { status: CommentStatus.DELETED },
-    });
-
-    const stats = {
-      total: totalComments,
-      approved: approvedComments,
-      pending: pendingComments,
-      rejected: rejectedComments,
-      deleted: deletedComments,
-    };
-
-    return {
-      ...result,
-      stats,
-    };
+    return result;
   }
 
   async findAllByPost(postId: string) {
@@ -198,15 +157,16 @@ export class CommentsService {
       throw new NotFoundException('Post no encontrado');
     }
 
+    // Solo muestra comentarios ACTIVE en la vista pública
     const comments = await this.prisma.comment.findMany({
       where: {
         postId,
-        status: CommentStatus.APPROVED,
+        status: CommentStatus.ACTIVE,
         parentId: null,
       },
       include: {
         replies: {
-          where: { status: CommentStatus.APPROVED },
+          where: { status: CommentStatus.ACTIVE },
           select: {
             id: true,
             content: true,
@@ -231,19 +191,8 @@ export class CommentsService {
     const comment = await this.prisma.comment.findUnique({
       where: { id },
       include: {
-        post: {
-          select: {
-            id: true,
-            title: true,
-            slug: true,
-          },
-        },
-        parent: {
-          select: {
-            id: true,
-            authorName: true,
-          },
-        },
+        post: { select: { id: true, title: true, slug: true } },
+        parent: { select: { id: true, authorName: true } },
         replies: {
           select: {
             id: true,
@@ -275,23 +224,12 @@ export class CommentsService {
       throw new NotFoundException('Comentario no encontrado');
     }
 
-    const updatedComment = await this.prisma.comment.update({
+    return this.prisma.comment.update({
       where: { id },
       data: updateCommentDto,
       include: {
-        post: {
-          select: {
-            id: true,
-            title: true,
-            slug: true,
-          },
-        },
-        parent: {
-          select: {
-            id: true,
-            authorName: true,
-          },
-        },
+        post: { select: { id: true, title: true, slug: true } },
+        parent: { select: { id: true, authorName: true } },
         replies: {
           select: {
             id: true,
@@ -306,36 +244,32 @@ export class CommentsService {
         },
       },
     });
-
-    return updatedComment;
   }
 
   async updateStatus(id: string, status: CommentStatus) {
     const existingComment = await this.prisma.comment.findUnique({
       where: { id },
+      include: { replies: { select: { id: true } } },
     });
 
     if (!existingComment) {
       throw new NotFoundException('Comentario no encontrado');
     }
 
-    const updatedComment = await this.prisma.comment.update({
+    // Si se oculta el comentario padre, también se ocultan sus respuestas
+    if (status === CommentStatus.HIDDEN && existingComment.replies.length > 0) {
+      await this.prisma.comment.updateMany({
+        where: { parentId: id },
+        data: { status: CommentStatus.HIDDEN },
+      });
+    }
+
+    return this.prisma.comment.update({
       where: { id },
       data: { status },
       include: {
-        post: {
-          select: {
-            id: true,
-            title: true,
-            slug: true,
-          },
-        },
-        parent: {
-          select: {
-            id: true,
-            authorName: true,
-          },
-        },
+        post: { select: { id: true, title: true, slug: true } },
+        parent: { select: { id: true, authorName: true } },
         replies: {
           select: {
             id: true,
@@ -350,61 +284,35 @@ export class CommentsService {
         },
       },
     });
-
-    return updatedComment;
   }
 
   async remove(id: string) {
     const comment = await this.prisma.comment.findUnique({
       where: { id },
-      include: {
-        replies: true,
-      },
+      include: { replies: true },
     });
 
     if (!comment) {
       throw new NotFoundException('Comentario no encontrado');
     }
 
-    // Si tiene respuestas, marcarlo como eliminado en lugar de borrarlo
+    // Elimina las respuestas primero, luego el comentario
     if (comment.replies.length > 0) {
-      await this.prisma.comment.update({
-        where: { id },
-        data: { status: CommentStatus.DELETED },
-      });
-
-      return { message: 'Comentario marcado como eliminado' };
+      await this.prisma.comment.deleteMany({ where: { parentId: id } });
     }
 
-    // Si no tiene respuestas, eliminarlo completamente
-    await this.prisma.comment.delete({
-      where: { id },
-    });
+    await this.prisma.comment.delete({ where: { id } });
 
     return { message: 'Comentario eliminado correctamente' };
   }
 
   async getStats() {
-    const totalComments = await this.prisma.comment.count();
-    const approvedComments = await this.prisma.comment.count({
-      where: { status: CommentStatus.APPROVED },
-    });
-    const pendingComments = await this.prisma.comment.count({
-      where: { status: CommentStatus.PENDING },
-    });
-    const rejectedComments = await this.prisma.comment.count({
-      where: { status: CommentStatus.REJECTED },
-    });
-    const deletedComments = await this.prisma.comment.count({
-      where: { status: CommentStatus.DELETED },
-    });
+    const [total, active, hidden] = await Promise.all([
+      this.prisma.comment.count(),
+      this.prisma.comment.count({ where: { status: CommentStatus.ACTIVE } }),
+      this.prisma.comment.count({ where: { status: CommentStatus.HIDDEN } }),
+    ]);
 
-    return {
-      total: totalComments,
-      approved: approvedComments,
-      pending: pendingComments,
-      rejected: rejectedComments,
-      deleted: deletedComments,
-    };
+    return { total, active, hidden };
   }
 }

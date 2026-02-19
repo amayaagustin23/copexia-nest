@@ -105,10 +105,10 @@ export class PostsService {
             include: { category: true },
           },
           comments: {
-            where: { status: CommentStatus.APPROVED },
+            where: { status: CommentStatus.ACTIVE },
             include: {
               replies: {
-                where: { status: CommentStatus.APPROVED },
+                where: { status: CommentStatus.ACTIVE },
               },
             },
           },
@@ -170,7 +170,7 @@ export class PostsService {
           comments: {
             include: {
               replies: {
-                where: { status: CommentStatus.APPROVED },
+                where: { status: CommentStatus.ACTIVE },
               },
             },
           },
@@ -206,10 +206,10 @@ export class PostsService {
           include: { category: true },
         },
         comments: {
-          where: { status: CommentStatus.APPROVED },
+          where: { status: CommentStatus.ACTIVE },
           include: {
             replies: {
-              where: { status: CommentStatus.APPROVED },
+              where: { status: CommentStatus.ACTIVE },
             },
           },
         },
@@ -252,7 +252,7 @@ export class PostsService {
     const commentCount = await this.prisma.comment.count({
       where: {
         postId: post.id,
-        status: CommentStatus.APPROVED,
+        status: CommentStatus.ACTIVE,
         parentId: null,
       },
     });
@@ -556,8 +556,8 @@ export class PostsService {
         author: { select: { id: true, name: true, email: true } },
         categories: { include: { category: true } },
         comments: {
-          where: { status: CommentStatus.APPROVED },
-          include: { replies: { where: { status: CommentStatus.APPROVED } } },
+          where: { status: CommentStatus.ACTIVE },
+          include: { replies: { where: { status: CommentStatus.ACTIVE } } },
         },
       },
     });
@@ -570,8 +570,8 @@ export class PostsService {
         author: { select: { id: true, name: true, email: true } },
         categories: { include: { category: true } },
         comments: {
-          where: { status: CommentStatus.APPROVED },
-          include: { replies: { where: { status: CommentStatus.APPROVED } } },
+          where: { status: CommentStatus.ACTIVE },
+          include: { replies: { where: { status: CommentStatus.ACTIVE } } },
         },
       },
     });
@@ -612,9 +612,9 @@ export class PostsService {
             author: { select: { id: true, name: true, email: true } },
             categories: { include: { category: true } },
             comments: {
-              where: { status: CommentStatus.APPROVED },
+              where: { status: CommentStatus.ACTIVE },
               include: {
-                replies: { where: { status: CommentStatus.APPROVED } },
+                replies: { where: { status: CommentStatus.ACTIVE } },
               },
             },
           },

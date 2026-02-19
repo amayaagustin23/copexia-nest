@@ -37,7 +37,7 @@ export class CommentResponseDto {
   @ApiProperty({
     description: 'Estado del comentario',
     enum: CommentStatus,
-    example: CommentStatus.APPROVED,
+    example: CommentStatus.ACTIVE,
   })
   status: CommentStatus;
 

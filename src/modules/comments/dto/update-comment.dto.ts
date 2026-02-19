@@ -42,7 +42,7 @@ export class UpdateCommentDto {
   @ApiProperty({
     description: 'Estado del comentario',
     enum: CommentStatus,
-    example: CommentStatus.APPROVED,
+    example: CommentStatus.ACTIVE,
     required: false,
   })
   @IsOptional()
